@@ -1,0 +1,14 @@
+.env
+.env.*
+*.py[cod]
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+dist/
+build/
+
+# Local dataset link / large external data.
+/mind2web_data

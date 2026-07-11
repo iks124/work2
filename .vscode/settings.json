@@ -1,0 +1,7 @@
+{
+  "workbench.editorAssociations": {
+    "*.md": "vscode.markdown.preview.editor",
+    "*.copilotmd": "vscode.markdown.preview.editor"
+  },
+  "editor.inlineSuggest.enabled": false
+}

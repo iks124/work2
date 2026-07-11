@@ -1,0 +1,9 @@
+[submodule "Mind2Web"]
+	path = Mind2Web
+	url = https://github.com/OSU-NLP-Group/Mind2Web.git
+[submodule "PolySkill"]
+	path = PolySkill
+	url = https://github.com/simonucl/PolySkill.git
+[submodule "XSkill"]
+	path = XSkill
+	url = https://github.com/XSkill-Agent/XSkill.git
