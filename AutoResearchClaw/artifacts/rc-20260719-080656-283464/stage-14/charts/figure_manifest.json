@@ -1,0 +1,14 @@
+[
+  {
+    "figure_number": 1,
+    "figure_id": "fig_compute_comparison",
+    "file_path": "charts/fig_compute_comparison.png",
+    "absolute_path": "/home/shihoukun/project/work2/AutoResearchClaw/artifacts/rc-20260719-080656-283464/stage-14/charts/fig_compute_comparison.png",
+    "title": "Equal Analytical FLOPs, Unequal Measured Latency",
+    "caption": "Per-layer microbenchmark latency for sparse rank-16 Signed Top-2 and dense rank-4 softmax at the same reported analytical active FLOPs of 619,773,952 per layer. Sparse routing measures 0.753 ms versus 0.533 ms for dense composition; stored parameter counts are not matched.",
+    "paper_section": "Results",
+    "width": "single_column",
+    "label": "fig:fig_compute_comparison",
+    "script_path": "/home/shihoukun/project/work2/AutoResearchClaw/artifacts/rc-20260719-080656-283464/stage-14/charts/scripts/fig_compute_comparison.py"
+  }
+]

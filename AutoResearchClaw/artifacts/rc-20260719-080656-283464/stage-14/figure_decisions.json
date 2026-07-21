@@ -1,0 +1,79 @@
+{
+  "decisions": [
+    {
+      "section": "Method",
+      "figure_type": "architecture_diagram",
+      "backend": "image",
+      "description": "Architecture overview diagram for the proposed method in the paper about: 固定容量内容寻址低秩 adapter basis memory 用于冻结 ViT 的持续学习；评估 scale=0.1 Hard/Signed Top-2 与负载均衡消融",
+      "priority": 1
+    },
+    {
+      "section": "Results",
+      "figure_type": "bar_comparison",
+      "backend": "code",
+      "description": "Bar chart comparing main metric across 6 experimental conditions",
+      "priority": 1
+    },
+    {
+      "section": "Results",
+      "figure_type": "training_curve",
+      "backend": "code",
+      "description": "Training convergence curves with loss/metric over epochs",
+      "priority": 2
+    },
+    {
+      "section": "Results",
+      "figure_type": "bar_comparison",
+      "backend": "code",
+      "description": "Ablation study showing contribution of each component",
+      "priority": 2
+    },
+    {
+      "section": "Method",
+      "figure_type": "pipeline_overview",
+      "backend": "image",
+      "description": "Step-by-step pipeline flowchart showing the method's workflow for: 固定容量内容寻址低秩 adapter basis memory 用于冻结 ViT 的持续学习；评估 scale=0.1 Hard/Signed Top-2 与负载均衡消融",
+      "priority": 2
+    }
+  ],
+  "code_figures": [
+    {
+      "section": "Results",
+      "figure_type": "bar_comparison",
+      "backend": "code",
+      "description": "Bar chart comparing main metric across 6 experimental conditions",
+      "priority": 1
+    },
+    {
+      "section": "Results",
+      "figure_type": "training_curve",
+      "backend": "code",
+      "description": "Training convergence curves with loss/metric over epochs",
+      "priority": 2
+    },
+    {
+      "section": "Results",
+      "figure_type": "bar_comparison",
+      "backend": "code",
+      "description": "Ablation study showing contribution of each component",
+      "priority": 2
+    }
+  ],
+  "image_figures": [
+    {
+      "section": "Method",
+      "figure_type": "architecture_diagram",
+      "backend": "image",
+      "description": "Architecture overview diagram for the proposed method in the paper about: 固定容量内容寻址低秩 adapter basis memory 用于冻结 ViT 的持续学习；评估 scale=0.1 Hard/Signed Top-2 与负载均衡消融",
+      "priority": 1
+    },
+    {
+      "section": "Method",
+      "figure_type": "pipeline_overview",
+      "backend": "image",
+      "description": "Step-by-step pipeline flowchart showing the method's workflow for: 固定容量内容寻址低秩 adapter basis memory 用于冻结 ViT 的持续学习；评估 scale=0.1 Hard/Signed Top-2 与负载均衡消融",
+      "priority": 2
+    }
+  ],
+  "total": 5
+}

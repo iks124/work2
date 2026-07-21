@@ -1,0 +1,232 @@
+{
+  "matched_domains": [
+    "continual_learning",
+    "transfer_learning",
+    "llm_finetuning"
+  ],
+  "benchmarks": [
+    {
+      "name": "Split CIFAR-100",
+      "tier": 1,
+      "domain": "continual_learning",
+      "size_mb": 170,
+      "classes": 100,
+      "samples": 60000,
+      "metrics": [
+        "average_accuracy",
+        "forgetting_rate",
+        "backward_transfer"
+      ],
+      "api": "torchvision.datasets.CIFAR100(root='/workspace/data', download=False)",
+      "note": "Split into 10 or 20 tasks (10 or 5 classes each)",
+      "source_domain": "continual_learning",
+      "origin": "knowledge_base"
+    },
+    {
+      "name": "Split MNIST",
+      "tier": 1,
+      "domain": "continual_learning",
+      "size_mb": 50,
+      "classes": 10,
+      "samples": 70000,
+      "metrics": [
+        "average_accuracy",
+        "forgetting_rate"
+      ],
+      "api": "torchvision.datasets.MNIST(root='/workspace/data', download=False)",
+      "note": "Split into 5 tasks (2 classes each)",
+      "source_domain": "continual_learning",
+      "origin": "knowledge_base"
+    },
+    {
+      "name": "Permuted MNIST",
+      "tier": 1,
+      "domain": "continual_learning",
+      "size_mb": 50,
+      "classes": 10,
+      "samples": 70000,
+      "metrics": [
+        "average_accuracy",
+        "backward_transfer"
+      ],
+      "api": "torchvision.datasets.MNIST(root='/workspace/data', download=False)",
+      "note": "Each task applies a random pixel permutation",
+      "source_domain": "continual_learning",
+      "origin": "knowledge_base"
+    },
+    {
+      "name": "CIFAR-10-C",
+      "tier": 2,
+      "domain": "robustness",
+      "size_mb": 2700,
+      "classes": 10,
+      "metrics": [
+        "accuracy",
+        "mean_corruption_error"
+      ],
+      "api": "datasets.load_dataset('cifar10_corrupted', cache_dir='/workspace/data/hf')",
+      "note": "15 corruption types × 5 severity levels",
+      "source_domain": "transfer_learning",
+      "origin": "knowledge_base"
+    },
+    {
+      "name": "CIFAR-10",
+      "tier": 1,
+      "domain": "image_classification",
+      "size_mb": 170,
+      "classes": 10,
+      "metrics": [
+        "accuracy"
+      ],
+      "api": "torchvision.datasets.CIFAR10(root='/workspace/data', download=False)",
+      "note": "Source domain for corruption/shift experiments",
+      "source_domain": "transfer_learning",
+      "origin": "knowledge_base"
+    },
+    {
+      "name": "Office-31",
+      "tier": 2,
+      "domain": "domain_adaptation",
+      "size_mb": 800,
+      "classes": 31,
+      "samples": 4652,
+      "metrics": [
+        "accuracy"
+      ],
+      "api": "Custom download from official source",
+      "source_domain": "transfer_learning",
+      "origin": "knowledge_base"
+    },
+    {
+      "name": "Alpaca",
+      "tier": 2,
+      "domain": "instruction_following",
+      "size_mb": 25,
+      "samples": 52000,
+      "metrics": [
+        "loss",
+        "perplexity"
+      ],
+      "api": "datasets.load_dataset('tatsu-lab/alpaca', cache_dir='/workspace/data/hf')",
+      "source_domain": "llm_finetuning",
+      "origin": "knowledge_base"
+    },
+    {
+      "name": "MMLU",
+      "tier": 2,
+      "domain": "general_knowledge",
+      "size_mb": 12,
+      "classes": 57,
+      "metrics": [
+        "accuracy"
+      ],
+      "api": "datasets.load_dataset('cais/mmlu', 'all', cache_dir='/workspace/data/hf')",
+      "source_domain": "llm_finetuning",
+      "origin": "knowledge_base"
+    },
+    {
+      "name": "HellaSwag",
+      "tier": 2,
+      "domain": "commonsense_reasoning",
+      "size_mb": 70,
+      "metrics": [
+        "accuracy"
+      ],
+      "api": "datasets.load_dataset('Rowan/hellaswag', cache_dir='/workspace/data/hf')",
+      "source_domain": "llm_finetuning",
+      "origin": "knowledge_base"
+    }
+  ],
+  "baselines": [
+    {
+      "name": "EWC",
+      "source": "Custom: Elastic Weight Consolidation (Fisher penalty)",
+      "paper": "Kirkpatrick et al., Overcoming catastrophic forgetting, PNAS 2017",
+      "pip": [],
+      "source_domain": "continual_learning",
+      "origin": "knowledge_base"
+    },
+    {
+      "name": "SI (Synaptic Intelligence)",
+      "source": "Custom: Path integral of parameter importance",
+      "paper": "Zenke et al., Continual Learning Through Synaptic Intelligence, ICML 2017",
+      "pip": [],
+      "source_domain": "continual_learning",
+      "origin": "knowledge_base"
+    },
+    {
+      "name": "PackNet",
+      "source": "Custom: Progressive pruning and re-training",
+      "paper": "Mallya & Lazebnik, PackNet, CVPR 2018",
+      "pip": [],
+      "source_domain": "continual_learning",
+      "origin": "knowledge_base"
+    },
+    {
+      "name": "Experience Replay",
+      "source": "Custom: Maintain memory buffer of past examples",
+      "paper": "Chaudhry et al., Continual Learning with Tiny Episodic Memories, 2019",
+      "pip": [],
+      "source_domain": "continual_learning",
+      "origin": "knowledge_base"
+    },
+    {
+      "name": "DANN",
+      "source": "Custom: Domain-Adversarial Neural Network (gradient reversal)",
+      "paper": "Ganin et al., Domain-Adversarial Training, JMLR 2016",
+      "pip": [],
+      "source_domain": "transfer_learning",
+      "origin": "knowledge_base"
+    },
+    {
+      "name": "CORAL",
+      "source": "Custom: Correlation alignment loss",
+      "paper": "Sun & Saenko, Deep CORAL, ECCV 2016",
+      "pip": [],
+      "source_domain": "transfer_learning",
+      "origin": "knowledge_base"
+    },
+    {
+      "name": "AugMax",
+      "source": "Custom: Adversarial data augmentation",
+      "paper": "Wang et al., AugMax, NeurIPS 2021",
+      "pip": [],
+      "source_domain": "transfer_learning",
+      "origin": "knowledge_base"
+    },
+    {
+      "name": "Full Fine-Tuning",
+      "source": "Standard supervised fine-tuning on all parameters",
+      "paper": "Baseline approach",
+      "pip": [
+        "transformers"
+      ],
+      "source_domain": "llm_finetuning",
+      "origin": "knowledge_base"
+    },
+    {
+      "name": "LoRA",
+      "source": "peft.LoraConfig(r=16, lora_alpha=32, target_modules=['q_proj', 'v_proj'])",
+      "paper": "Hu et al., LoRA, ICLR 2022",
+      "pip": [
+        "peft"
+      ],
+      "source_domain": "llm_finetuning",
+      "origin": "knowledge_base"
+    },
+    {
+      "name": "QLoRA",
+      "source": "BitsAndBytesConfig(load_in_4bit=True) + LoRA",
+      "paper": "Dettmers et al., QLoRA, NeurIPS 2023",
+      "pip": [
+        "peft",
+        "bitsandbytes"
+      ],
+      "source_domain": "llm_finetuning",
+      "origin": "knowledge_base"
+    }
+  ],
+  "hf_datasets_found": 0,
+  "llm_fallback_used": false,
+  "rationale": ""
+}

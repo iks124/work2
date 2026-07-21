@@ -1,0 +1,38 @@
+[
+  {
+    "figure_id": "fig_main_results",
+    "chart_type": "grouped_bar",
+    "output_filename": "fig_main_results.png",
+    "title": "Smoke-Test Performance Across Routing Variants",
+    "caption": "Average and final accuracy for CaRE and all evaluated basis-memory variants under the CIFAR-100 50+50 smoke protocol. Results are single-seed, one-epoch-per-phase observations; no error bars or statistical significance are implied.",
+    "section": "results",
+    "width": "double_column"
+  },
+  {
+    "figure_id": "fig_scale_ablation",
+    "chart_type": "ablation_grouped",
+    "output_filename": "fig_scale_ablation.png",
+    "title": "Effect of Adapter Residual Scale",
+    "caption": "Changing the Hard Top-2 adapter scale to 0.1 raises average accuracy from 86.165% to 90.055% and final accuracy from 83.91% to 88.89%, while reducing forgetting from 3.78 to 3.22 points. This is a descriptive single-run ablation and does not isolate scale from run-to-run randomness.",
+    "section": "analysis",
+    "width": "single_column"
+  },
+  {
+    "figure_id": "fig_balance_ablation",
+    "chart_type": "ablation_grouped",
+    "output_filename": "fig_balance_ablation.png",
+    "title": "Load-Balancing Accuracy–Forgetting Trade-off",
+    "caption": "Comparison of Hard Top-2 at scale 0.1 with load-balancing weights 0, 0.1, and 1.0. Stronger balancing lowers average and final accuracy; the low forgetting value at weight 0.1 must be interpreted alongside its lower first-phase accuracy rather than as independent evidence of improved retention.",
+    "section": "analysis",
+    "width": "double_column"
+  },
+  {
+    "figure_id": "fig_compute_comparison",
+    "chart_type": "bar_comparison",
+    "output_filename": "fig_compute_comparison.png",
+    "title": "Equal Analytical FLOPs, Unequal Measured Latency",
+    "caption": "Per-layer microbenchmark latency for sparse rank-16 Signed Top-2 and dense rank-4 softmax at the same reported analytical active FLOPs of 619,773,952 per layer. Sparse routing measures 0.753 ms versus 0.533 ms for dense composition; stored parameter counts are not matched.",
+    "section": "results",
+    "width": "single_column"
+  }
+]

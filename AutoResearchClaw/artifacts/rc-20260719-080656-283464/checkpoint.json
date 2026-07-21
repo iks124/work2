@@ -1,0 +1,38 @@
+{
+  "last_completed_stage": 15,
+  "last_completed_name": "RESEARCH_DECISION",
+  "run_id": "rc-20260719-182306-b47565",
+  "timestamp": "2026-07-19T18:33:47+00:00",
+  "hitl": {
+    "mode": "co-pilot",
+    "interventions_count": 1,
+    "last_intervention": {
+      "id": "a67fcf35-5cb",
+      "type": "approve",
+      "stage": 15,
+      "stage_name": "RESEARCH_DECISION",
+      "timestamp": "2026-07-19T18:33:47+00:00",
+      "human_input": {
+        "action": "approve",
+        "message": "",
+        "guidance": "",
+        "edited_files": {},
+        "config_changes": {},
+        "resources": [],
+        "rollback_to_stage": null,
+        "timestamp": "2026-07-19T18:33:47+00:00"
+      },
+      "pause_reason": "gate_approval",
+      "stage_output_summary": "",
+      "quality_score": null,
+      "confidence_score": null,
+      "outcome": "Human chose: approve",
+      "accepted": true,
+      "duration_sec": 15.711097478982992
+    },
+    "pending_stage": null,
+    "collaboration_active": false,
+    "human_edits": [],
+    "total_human_time_sec": 15.7
+  }
+}

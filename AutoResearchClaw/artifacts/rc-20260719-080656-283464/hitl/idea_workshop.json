@@ -1,0 +1,10 @@
+{
+  "candidates": [
+    {
+      "title": "Generated Hypothesis",
+      "description": "[thinking] **Synthesizing baseline feasibility methodology**\nFinal research program\n\nThe decisive experiment should use one frozen pretrained ViT, identical classifier calibration, fixed memory capacity, and both nominal-compute and wall-clock matching. It should include clean task-separated streams and genuinely boundary-free streams. Four hypotheses capture the highest-value scientific disagreements.\n\n1. Memory helps only after calibration is exhausted\u2014and basis memory is the strongest default"
+    }
+  ],
+  "evaluations": [],
+  "selected": null
+}

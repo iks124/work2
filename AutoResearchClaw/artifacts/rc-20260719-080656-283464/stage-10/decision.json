@@ -1,0 +1,19 @@
+{
+  "stage_id": "10-code_generation",
+  "run_id": "rc-20260719-150308-c91719",
+  "status": "failed",
+  "decision": "proceed",
+  "output_artifacts": [
+    "experiment/",
+    "experiment_spec.md",
+    "validation_report.md"
+  ],
+  "evidence_refs": [
+    "stage-10/experiment/",
+    "stage-10/experiment_spec.md",
+    "stage-10/validation_report.md"
+  ],
+  "error": "Topic-experiment misalignment: The structure is substantially closer: it implements distinct Signed Top-2, Hard Top-2, and dense-softmax mechanisms; enforces immutable memory across optimizer steps; performs structural tests; uses task-agnostic seen-class prediction; and computes negative average incremental accuracy. However, it still does not reliably execute the stated CaRE/ViT Split CIFAR-100 experiment. It consumes an externally prepared feature NPZ instead of running or verifying the official frozen CaRE ViT, and merely trusts embedded commit/checksum strings. Missing formal artifacts are caught as ordinary failures, allowing a successful smoke-only run. More importantly, the read-only keys and adapter bases are synthetic sinusoidal tensors rather than learned or checkpoint-derived memory, so the experiment mainly trains a router and classifier over arbitrary fixed projections and cannot substantively test a CaRE-derived adapter basis memory. Dense softmax is also not active-compute matched, and the promised equal-compute dense control is absent.",
+  "ts": "2026-07-19T15:25:45+00:00",
+  "next_stage": 10
+}

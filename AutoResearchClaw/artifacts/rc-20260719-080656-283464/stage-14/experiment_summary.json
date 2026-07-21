@@ -1,0 +1,90 @@
+{
+  "metrics_summary": {},
+  "total_runs": 0,
+  "best_run": null,
+  "latex_table": "",
+  "generated": "2026-07-19T18:23:06+00:00",
+  "condition_summaries": {
+    "metrics": {
+      "metrics": {
+        "average_accuracy": 90.055,
+        "final_accuracy": 88.89,
+        "forgetting": 3.22
+      }
+    },
+    "protocol": {
+      "metrics": {
+        "seed": 1993.0,
+        "epochs_per_phase": 1.0
+      }
+    },
+    "conditions": {
+      "metrics": {}
+    },
+    "engineering_checks": {
+      "metrics": {
+        "unit_tests_passed": 8.0,
+        "unit_tests_total": 8.0,
+        "full_vit_forward_backward": 1.0,
+        "strict_top2_sparsity": 1.0,
+        "finite_nonzero_basis_gradients": 1.0,
+        "fixed_basis_capacity_across_tasks": 1.0,
+        "cuda_amp_regression_passed": 1.0,
+        "sparse_compute_after_routing": 1.0
+      }
+    },
+    "compute": {
+      "metrics": {
+        "signed_rank16_active_flops_per_layer_batch32_tokens197": 619773952.0,
+        "dense_rank4_active_flops_per_layer_batch32_tokens197": 619773952.0,
+        "signed_microbenchmark_ms_per_layer": 0.753,
+        "dense_microbenchmark_ms_per_layer": 0.533
+      }
+    },
+    "hypotheses": {
+      "metrics": {}
+    }
+  },
+  "condition_metrics": {
+    "metrics": {
+      "metrics": {
+        "average_accuracy": 90.055,
+        "final_accuracy": 88.89,
+        "forgetting": 3.22
+      }
+    },
+    "protocol": {
+      "metrics": {
+        "seed": 1993.0,
+        "epochs_per_phase": 1.0
+      }
+    },
+    "conditions": {
+      "metrics": {}
+    },
+    "engineering_checks": {
+      "metrics": {
+        "unit_tests_passed": 8.0,
+        "unit_tests_total": 8.0,
+        "full_vit_forward_backward": 1.0,
+        "strict_top2_sparsity": 1.0,
+        "finite_nonzero_basis_gradients": 1.0,
+        "fixed_basis_capacity_across_tasks": 1.0,
+        "cuda_amp_regression_passed": 1.0,
+        "sparse_compute_after_routing": 1.0
+      }
+    },
+    "compute": {
+      "metrics": {
+        "signed_rank16_active_flops_per_layer_batch32_tokens197": 619773952.0,
+        "dense_rank4_active_flops_per_layer_batch32_tokens197": 619773952.0,
+        "signed_microbenchmark_ms_per_layer": 0.753,
+        "dense_microbenchmark_ms_per_layer": 0.533
+      }
+    },
+    "hypotheses": {
+      "metrics": {}
+    }
+  },
+  "total_conditions": 6
+}

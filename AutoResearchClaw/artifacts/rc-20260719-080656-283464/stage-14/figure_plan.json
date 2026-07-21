@@ -1,0 +1,25 @@
+{
+  "manifest": [
+    {
+      "figure_number": 1,
+      "figure_id": "fig_compute_comparison",
+      "file_path": "charts/fig_compute_comparison.png",
+      "absolute_path": "/home/shihoukun/project/work2/AutoResearchClaw/artifacts/rc-20260719-080656-283464/stage-14/charts/fig_compute_comparison.png",
+      "title": "Equal Analytical FLOPs, Unequal Measured Latency",
+      "caption": "Per-layer microbenchmark latency for sparse rank-16 Signed Top-2 and dense rank-4 softmax at the same reported analytical active FLOPs of 619,773,952 per layer. Sparse routing measures 0.753 ms versus 0.533 ms for dense composition; stored parameter counts are not matched.",
+      "paper_section": "Results",
+      "width": "single_column",
+      "label": "fig:fig_compute_comparison",
+      "script_path": "/home/shihoukun/project/work2/AutoResearchClaw/artifacts/rc-20260719-080656-283464/stage-14/charts/scripts/fig_compute_comparison.py"
+    }
+  ],
+  "markdown_refs": "![Figure 1: Per-layer microbenchmark latency for sparse rank-16 Signed Top-2 and dense rank-4 softmax at the same reported analytical active FLOPs of 619,773,952 per layer. Sparse routing measures 0.753 ms versus 0.533 ms for dense composition; stored parameter counts are not matched.](charts/fig_compute_comparison.png)",
+  "figure_descriptions": "## AVAILABLE FIGURES (embed in the paper)\nThe following figures were generated from actual experiment data. Reference them in the appropriate paper sections using markdown image syntax: `![Caption](charts/filename.png)`\n\n**Figure 1** (`charts/fig_compute_comparison.png`) \u2014 Equal Analytical FLOPs, Unequal Measured Latency\n  Caption: Per-layer microbenchmark latency for sparse rank-16 Signed Top-2 and dense rank-4 softmax at the same reported analytical active FLOPs of 619,773,952 per layer. Sparse routing measures 0.753 ms versus 0.533 ms for dense composition; stored parameter counts are not matched.\n  Place in: **Results** section\n\n\nFor each figure referenced, write a descriptive caption and discuss what the figure shows in 2-3 sentences.\n",
+  "output_dir": "artifacts/rc-20260719-080656-283464/stage-14/charts",
+  "manifest_path": "artifacts/rc-20260719-080656-283464/stage-14/charts/figure_manifest.json",
+  "figure_count": 1,
+  "passed_count": 1,
+  "total_llm_calls": 15,
+  "total_tokens": 0,
+  "elapsed_sec": 326.35850833402947
+}

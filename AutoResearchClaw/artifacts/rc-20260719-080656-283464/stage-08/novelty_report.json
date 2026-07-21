@@ -1,0 +1,17 @@
+{
+  "topic": "NTM-style differentiable expert memory for task-agnostic class-incremental learning with pretrained Vision Transformers: compare latent expert memory, basis memory, hybrid allocate-or-write, and CaRE plus memory routing under matched parameters and compute; use real literature and real experiments only.",
+  "hypotheses_checked": 2,
+  "search_queries": [
+    "NTM-style differentiable expert memory for task-agnostic class-incremental learning with pretrained Vision Transformers: compare latent expert memory, basis memory, hybrid allocate-or-write, and CaRE plus memory routing under matched parameters and compute; use real literature and real experiments only.",
+    "thinking synthesizing baseline feasibility methodology"
+  ],
+  "similar_papers_found": 0,
+  "novelty_score": 1.0,
+  "assessment": "high",
+  "similar_papers": [],
+  "recommendation": "proceed",
+  "similarity_threshold": 0.25,
+  "search_coverage": "full",
+  "total_papers_retrieved": 45,
+  "generated": "2026-07-19T08:39:35+00:00"
+}

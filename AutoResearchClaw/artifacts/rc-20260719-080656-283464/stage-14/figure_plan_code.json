@@ -1,0 +1,50 @@
+[
+  {
+    "figure_id": "fig_main_results",
+    "chart_type": "grouped_bar",
+    "title": "Smoke-Test Performance Across Routing Variants",
+    "caption": "Average and final accuracy for CaRE and all evaluated basis-memory variants under the CIFAR-100 50+50 smoke protocol. Results are single-seed, one-epoch-per-phase observations; no error bars or statistical significance are implied.",
+    "data_source": "conditions.care, conditions.signed_top2_basis_rank16, conditions.hard_top2_basis_rank16, conditions.dense_softmax_basis_rank4_equal_active_flops, conditions.hard_top2_scale01, conditions.signed_top2_scale01; metrics average_accuracy and final_top1",
+    "x_label": "Method",
+    "y_label": "Accuracy (%)",
+    "width": "double_column",
+    "priority": 1,
+    "section": "results"
+  },
+  {
+    "figure_id": "fig_scale_ablation",
+    "chart_type": "ablation_grouped",
+    "title": "Effect of Adapter Residual Scale",
+    "caption": "Changing the Hard Top-2 adapter scale to 0.1 raises average accuracy from 86.165% to 90.055% and final accuracy from 83.91% to 88.89%, while reducing forgetting from 3.78 to 3.22 points. This is a descriptive single-run ablation and does not isolate scale from run-to-run randomness.",
+    "data_source": "conditions.hard_top2_basis_rank16 and conditions.hard_top2_scale01; metrics task0_top1, final_top1, average_accuracy, and forgetting",
+    "x_label": "Hard Top-2 Scale Setting",
+    "y_label": "Metric Value (percentage points)",
+    "width": "single_column",
+    "priority": 1,
+    "section": "analysis"
+  },
+  {
+    "figure_id": "fig_balance_ablation",
+    "chart_type": "ablation_grouped",
+    "title": "Load-Balancing Accuracy–Forgetting Trade-off",
+    "caption": "Comparison of Hard Top-2 at scale 0.1 with load-balancing weights 0, 0.1, and 1.0. Stronger balancing lowers average and final accuracy; the low forgetting value at weight 0.1 must be interpreted alongside its lower first-phase accuracy rather than as independent evidence of improved retention.",
+    "data_source": "conditions.hard_top2_scale01, conditions.hard_top2_scale01_balance01, and conditions.hard_top2_scale01_balance1; metrics task0_top1, final_top1, average_accuracy, and forgetting",
+    "x_label": "Load-Balancing Weight",
+    "y_label": "Metric Value (percentage points)",
+    "width": "double_column",
+    "priority": 1,
+    "section": "analysis"
+  },
+  {
+    "figure_id": "fig_compute_comparison",
+    "chart_type": "bar_comparison",
+    "title": "Equal Analytical FLOPs, Unequal Measured Latency",
+    "caption": "Per-layer microbenchmark latency for sparse rank-16 Signed Top-2 and dense rank-4 softmax at the same reported analytical active FLOPs of 619,773,952 per layer. Sparse routing measures 0.753 ms versus 0.533 ms for dense composition; stored parameter counts are not matched.",
+    "data_source": "compute.signed_rank16_active_flops_per_layer_batch32_tokens197, compute.dense_rank4_active_flops_per_layer_batch32_tokens197, compute.signed_microbenchmark_ms_per_layer, and compute.dense_microbenchmark_ms_per_layer",
+    "x_label": "Routing and Basis Configuration",
+    "y_label": "Latency per Layer (ms)",
+    "width": "single_column",
+    "priority": 2,
+    "section": "results"
+  }
+]

@@ -1,0 +1,63 @@
+project:
+  name: "codex-research"
+  mode: "full-auto"
+
+research:
+  topic: "请在运行命令时通过 --topic 指定研究主题"
+  domains:
+    - "machine-learning"
+
+runtime:
+  timezone: "Asia/Shanghai"
+  max_parallel_tasks: 1
+  retry_limit: 2
+
+notifications:
+  channel: "console"
+  target: ""
+
+knowledge_base:
+  backend: "markdown"
+  root: "docs/kb"
+
+llm:
+  provider: "acp"
+  acp:
+    agent: "codex"
+    cwd: "."
+    acpx_command: ".tools/acpx-bin"
+    session_name: "researchclaw"
+    timeout_sec: 1800
+
+literature_search:
+  sources:
+    - "openalex"
+    - "semantic_scholar"
+    - "arxiv"
+  max_results_per_query: 20
+  inter_query_delay_sec: 1.5
+
+experiment:
+  mode: "sandbox"
+  time_budget_sec: 300
+  max_iterations: 3
+  metric_key: "primary_metric"
+  metric_direction: "minimize"
+  sandbox:
+    python_path: ".venv/bin/python3"
+    gpu_required: false
+    max_memory_mb: 4096
+  opencode:
+    enabled: false
+
+hitl:
+  enabled: true
+  mode: "co-pilot"
+  cost_budget_usd: 0.0
+  notifications:
+    channels:
+      - "terminal"
+
+export:
+  target_conference: "neurips_2025"
+  authors: "Anonymous"

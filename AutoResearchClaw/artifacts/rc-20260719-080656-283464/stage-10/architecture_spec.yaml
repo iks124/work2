@@ -1,0 +1,400 @@
+files:
+  - name: config.py
+    generation_order: 1
+    dependencies: []
+    purpose: Immutable experiment configuration, condition registry, matching tolerances, and runtime policy.
+    classes:
+      - name: ExperimentConfig
+        minimum_effective_lines: 20
+        fields:
+          - mode: "smoke"
+          - data_root: "./data"
+          - output_path: "results.json"
+          - class_order_path: "./class_orders.json"
+          - seeds: [11, 22, 33]
+          - num_tasks: 10
+          - classes_per_task: 10
+          - input_size: 224
+          - embedding_dim: 768
+          - smoke_embedding_dim: 64
+          - smoke_tokens: 17
+          - smoke_batch_size: 4
+          - basis_count: 8
+          - active_bases: 2
+          - basis_rank: 2
+          - full_adapter_rank: 4
+          - key_dim: 64
+          - router_temperature: 0.2
+          - hysteresis_weight: 0.05
+          - route_ema_decay: 0.99
+          - load_balance_weight: 0.01
+          - damage_weight: 0.1
+          - write_weight: 0.001
+          - damage_threshold: 0.02
+          - erase_gate_max: 0.1
+          - add_norm_max: 0.05
+          - cumulative_slot_drift_max: 0.2
+          - gradient_clip_norm: 1.0
+          - stored_parameter_tolerance: 0.02
+          - active_flops_tolerance: 0.05
+          - time_limit_seconds: 300
+          - formal_requires_gpu: true
+          - download_data: false
+        methods:
+          - name: __post_init__
+            pseudocode: |
+              1. Assert basis_count >= active_bases == 2 and every rank is positive.
+              2. Assert all write bounds and matching tolerances are nonnegative.
+              3. Reject formal mode unless CUDA, CIFAR-100, class orders, and pretrained weights are confirmed by main.py.
+              4. Reject any condition name containing ewc, replay, packnet, lora, cifar10c, or unrestricted_writable_memory.
+          - name: condition_names
+            pseudocode: |
+              1. In smoke mode return the two proposed methods only.
+              2. In formal mode return all direct controls, proposed methods, and declared ablations.
+              3. Preserve registry order so main.py executes conditions sequentially.
+          - name: validate_matching
+            signature: "(reference_parameters, candidate_parameters, reference_flops, candidate_flops) -> None"
+            pseudocode: |
+              1. Compute relative stored-parameter error using integer counts.
+              2. Compute relative analytical-active-FLOPs error.
+              3. Assert errors are <= 2% and <= 5%, respectively.
+              4. Never describe FLOPs matching as latency matching.
+
+  - name: data.py
+    generation_order: 2
+    dependencies: [config.py]
+    purpose: Synthetic unit fixtures and real task-agnostic Split CIFAR-100 streams.
+    classes:
+      - name: SplitCIFAR100DataModule
+        minimum_effective_lines: 20
+        methods:
+          - name: load_class_orders
+            signature: "(path) -> list[list[int]]"
+            pseudocode: |
+              1. Read at least three pre-generated permutations, each containing integers 0..99 exactly once.
+              2. Never generate or change an order during a method run.
+              3. Return identical immutable orders to every condition.
+          - name: build_transforms
+            pseudocode: |
+              1. Obtain normalization associated with the pinned pretrained ViT weights.
+              2. Train transform = RandomResizedCrop(224), RandomHorizontalFlip(), ToTensor(), normalization.
+              3. Test transform = Resize(224), CenterCrop(224), ToTensor(), normalization.
+          - name: formal_stream
+            signature: "(order, variant) -> iterable[TaskData]"
+            pseudocode: |
+              1. Load torchvision CIFAR100 train/test with download=False.
+              2. For task t, select order[10*t:10*(t+1)] without exposing task ID to the model.
+              3. clean_task_separated yields one class-filtered training loader per task.
+              4. boundary_free_interleaved deterministically interleaves the same examples and omits boundary signals.
+              5. Evaluation loader contains all classes seen so far; test labels are used only for metrics.
+          - name: smoke_fixture
+            signature: "(seed) -> dict[str, Tensor]"
+            pseudocode: |
+              1. Use a local torch.Generator seeded with seed.
+              2. Create tokens [4,17,64] float32 and labels [4] in [0,10).
+              3. Create protected prototypes [10,64] only for write-bound tests.
+              4. Mark tokens requires_grad=True; synthetic data must never produce accuracy claims.
+
+  - name: methods.py
+    generation_order: 3
+    dependencies: [config.py]
+    purpose: Model components and separate strategy classes for every experimental condition.
+    classes:
+      - name: ConditionBase(nn.Module)
+        abstract: true
+        minimum_effective_lines: 20
+        input_shape: "[B,N,D]"
+        output_shape: "logits [B,C]"
+        methods:
+          - name: __init__
+            pseudocode: |
+              1. Store a frozen ViT backbone or smoke identity encoder.
+              2. Create shared normalized class-prototype classifier [C,D] and scalar log-temperature.
+              3. Never override nn.Module.train or nn.Module.eval.
+          - name: encode
+            pseudocode: |
+              1. Map images [B,3,224,224] to frozen tokens [B,N,D], or accept smoke tokens [B,17,64].
+              2. Use CLS token z=tokens[:,0,:] [B,D].
+              3. Return tokens and L2-normalized z without detaching trainable adapter outputs.
+          - name: classify
+            pseudocode: |
+              1. L2-normalize features [B,D] and prototypes [C,D].
+              2. Return cosine logits [B,C] divided by positive shared temperature.
+          - name: compute_loss
+            pseudocode: |
+              1. Compute cross_entropy(logits [B,C], labels [B]).
+              2. Add only strategy-specific regularizers returned by forward.
+          - name: stored_parameter_count
+            pseudocode: Sum numel() over explicitly enumerated persistent parameters, including frozen memory.
+          - name: active_flops
+            pseudocode: Return deterministic analytical multiply-add count for one forward; exclude inactive sparse slots.
+
+      - name: CalibratedFrozenViTNCM(ConditionBase)
+        minimum_effective_lines: 20
+        differentiator: No adapter or memory; normalized nearest-class-mean control.
+        overrides: [forward]
+        methods:
+          - name: forward
+            pseudocode: Encode; classify the frozen CLS feature directly; return logits [B,C] and empty auxiliary state.
+
+      - name: SingleSharedAdapter(ConditionBase)
+        minimum_effective_lines: 20
+        differentiator: One shared bottleneck with no routing.
+        overrides: [forward]
+        methods:
+          - name: forward
+            pseudocode: |
+              1. Encode tokens x [B,N,D].
+              2. Compute delta=gelu(x @ A[D,R]) @ B[R,D] [B,N,D].
+              3. Classify (x+delta)[:,0,:]; no routing loss.
+
+      - name: HardTop1AdapterMixture(ConditionBase)
+        minimum_effective_lines: 20
+        differentiator: One complete adapter selected by straight-through Top-1.
+        overrides: [forward]
+        methods:
+          - name: forward
+            pseudocode: Compute cosine scores [B,M], create one-hot argmax with straight-through softmax gradient, apply only the selected full adapter, and return logits [B,C].
+
+      - name: HardTop2AdapterMixture(ConditionBase)
+        minimum_effective_lines: 20
+        differentiator: Two complete adapters with nonnegative normalized sparse weights.
+        overrides: [forward]
+        methods:
+          - name: forward
+            pseudocode: Select two score indices [B,2], scatter softmax weights into [B,M], combine two full-adapter outputs [B,N,D], and assert exactly two active slots per sample.
+
+      - name: DenseSoftmaxAdapterMixture(ConditionBase)
+        minimum_effective_lines: 20
+        differentiator: Every expert is evaluated and mixed; no allocation or writes.
+        overrides: [forward, active_flops]
+        methods:
+          - name: forward
+            pseudocode: Softmax all scores [B,M], evaluate all M adapters [B,M,N,D], weighted-sum over M, and return logits.
+          - name: active_flops
+            pseudocode: Count all M adapters; support a separately configured reduced-rank equal-active-compute construction.
+
+      - name: AppendOnlyAdapterMemory(HardTop2AdapterMixture)
+        minimum_effective_lines: 20
+        differentiator: Immutable keys and full adapters may only be appended into empty slots.
+        overrides: [forward]
+        methods:
+          - name: append
+            pseudocode: Under no_grad, fill one empty slot transactionally, detach copied key/value, mark occupied, and reject attempts to modify occupied slots.
+          - name: forward
+            pseudocode: Route only across occupied slots; use hard Top-2 when two exist and deterministic fallback otherwise.
+
+      - name: AllocateThenFreezeMemory(AppendOnlyAdapterMemory)
+        minimum_effective_lines: 20
+        differentiator: Allocation policy selects empty slots and immediately freezes their values.
+        overrides: [append]
+        methods:
+          - name: append
+            pseudocode: Select an empty slot by allocation score, copy detached tensors, clear any optimizer state for it, freeze key/value, and permit read-only routing after saturation.
+
+      - name: CaREInspiredBilevelRouting(HardTop2AdapterMixture)
+        minimum_effective_lines: 20
+        differentiator: Budget-matched group-then-expert routing over frozen experts.
+        overrides: [forward]
+        methods:
+          - name: forward
+            pseudocode: Route query [B,D] to group scores [B,G], then experts within selected groups, activate exactly two experts total, and compose their frozen full-adapter outputs.
+
+      - name: SignedTop2BasisMemory(ConditionBase)
+        minimum_effective_lines: 20
+        differentiator: Signed content addressing composes two low-rank parameter bases.
+        overrides: [forward, compute_loss, active_flops]
+        methods:
+          - name: route
+            pseudocode: |
+              1. Normalize query [B,D] and keys [M,D]; scores=(q @ keys.T)/temperature [B,M].
+              2. Select indices of top-2 absolute scores [B,2].
+              3. Gather signed scores s [B,2], set coefficients=s/(sum(abs(s),dim=1)+eps).
+              4. Scatter into sparse routes [B,M]; assert two nonzeros and sum(abs(route))=1.
+          - name: compose_adapter
+            pseudocode: |
+              1. Gather A bases [B,2,D,R] and B bases [B,2,R,D].
+              2. Compute each basis delta with einsum: [B,N,D] -> [B,2,N,D].
+              3. Weight by signed coefficients [B,2,1,1] and sum to [B,N,D].
+          - name: update_route_ema
+            pseudocode: Under no_grad, aggregate detached routes by training class and update EMA; never use test labels.
+          - name: forward
+            pseudocode: Encode, route from CLS, compose two bases, classify adapted CLS, and return current route [B,M].
+          - name: compute_loss
+            pseudocode: CE + 0.05*JS(current_route_distribution, stopgrad(class_route_ema)) + 0.01*load_balance_loss.
+          - name: active_flops
+            pseudocode: Count router plus exactly two rank-2 basis applications, not all stored bases.
+
+      - name: BoundedDamageAwareAllocateOrWrite(ConditionBase)
+        minimum_effective_lines: 20
+        differentiator: Transactional allocate-or-write selected by prospective protected-knowledge damage.
+        overrides: [forward, compute_loss]
+        methods:
+          - name: estimate_damage
+            pseudocode: Project candidate update and detached replay-free old-prototype gradient sketch to rank 4; return predicted nonnegative old-loss increase [B,M].
+          - name: bounded_erase_add
+            pseudocode: Clamp erase gate to [0,0.1], rescale add tensor to norm <=0.05, reject updates exceeding cumulative drift 0.2 or containing nonfinite values.
+          - name: allocate_or_write
+            pseudocode: |
+              1. If an empty slot exists and minimum damage exceeds 0.02, allocate it.
+              2. Otherwise choose legal occupied slot with minimum estimated damage.
+              3. Clone old slot state; apply bounded erase/add under no_grad.
+              4. Validate all bounds; on failure restore exact clone and increment rejection count.
+              5. Detach committed persistent state so graphs never cross iterations.
+          - name: forward
+            pseudocode: Route to occupied values, apply selected adapter to tokens [B,N,D], and return logits plus damage/write statistics.
+          - name: compute_loss
+            pseudocode: CE + 0.1*relu(damage-0.02) + 0.001*squared_write_norm.
+
+      - name: SignedTop2NoHysteresis(SignedTop2BasisMemory)
+        minimum_effective_lines: 20
+        differentiator: Signed Top-2 composition without historical-route state.
+        overrides: [compute_loss]
+        methods:
+          - name: compute_loss
+            pseudocode: Return CE + load-balance loss; do not read or update route EMA.
+
+      - name: UnsignedTop2BasisRouting(SignedTop2BasisMemory)
+        minimum_effective_lines: 20
+        differentiator: Absolute nonnegative Top-2 coefficients isolate signed cancellation.
+        overrides: [route]
+        methods:
+          - name: route
+            pseudocode: Select top-2 absolute similarities, replace selected values by abs(score), normalize their ordinary sum to one, and scatter exactly two nonnegative entries.
+
+      - name: NoveltyGatedWrite(BoundedDamageAwareAllocateOrWrite)
+        minimum_effective_lines: 20
+        differentiator: Novelty replaces the protected-gradient damage estimator.
+        overrides: [estimate_damage]
+        methods:
+          - name: estimate_damage
+            pseudocode: Return 1 minus cosine similarity between query [B,D] and slot keys [M,D]; retain identical transactional bounds.
+
+      - name: NearestSlotBoundedWrite(BoundedDamageAwareAllocateOrWrite)
+        minimum_effective_lines: 20
+        differentiator: After saturation always updates the cosine-nearest slot.
+        overrides: [allocate_or_write]
+        methods:
+          - name: allocate_or_write
+            pseudocode: Fill empty slots first; otherwise select maximum-cosine slot, then invoke the same bounded transactional erase/add validation.
+
+      - name: FrozenOldSlots(BoundedDamageAwareAllocateOrWrite)
+        minimum_effective_lines: 20
+        differentiator: Slots allocated before the current task cannot change.
+        overrides: [allocate_or_write]
+        methods:
+          - name: allocate_or_write
+            pseudocode: Mask old-task slots and optimizer state; allocate/update only current-task slots; reject the write when no legal current-task slot exists.
+
+      - name: NoWriteAllocateThenFreeze(BoundedDamageAwareAllocateOrWrite)
+        minimum_effective_lines: 20
+        differentiator: Occupied-slot erase/add is completely disabled.
+        overrides: [allocate_or_write]
+        methods:
+          - name: allocate_or_write
+            pseudocode: Allocate one detached empty slot and freeze it immediately; after capacity is full return a no-op write result with unchanged state.
+
+  - name: evaluate.py
+    generation_order: 4
+    dependencies: [config.py, data.py, methods.py]
+    purpose: Training, smoke assertions, continual-learning evaluation, accounting, and serialization.
+    functions:
+      - name: run_smoke_tests
+        signature: "(model, fixture, config) -> dict"
+        pseudocode: |
+          1. Forward tokens [4,17,64]; assert logits [4,10], loss scalar, and all values finite.
+          2. Backward; assert required router and memory gradients exist, are finite, and have nonzero norm.
+          3. For SignedTop2, assert exactly two active bases and L1-normalized signed coefficients.
+          4. For writable memory, test allocation capacity, erase/add/drift bounds, and byte-identical rollback.
+          5. Enumerate persistent parameters independently and compare with model accounting.
+          6. Call active_flops twice and assert identical integer results.
+          7. Return only pass/fail, exceptions, parameter count, and analytical FLOPs.
+      - name: train_task
+        pseudocode: |
+          1. Call model.train(); never pass task ID into forward.
+          2. For each training batch: zero_grad, forward, strategy loss, finite check, backward, clip norm to 1.0, optimizer step.
+          3. Update prototypes and permitted route EMA using training labels only and detached sufficient statistics.
+          4. Invoke memory writes only after optimizer step; never retain computation graphs across batches.
+      - name: evaluate_seen_classes
+        pseudocode: |
+          1. Call model.eval() under inference_mode.
+          2. Predict jointly over every seen class without task ID.
+          3. Return top-1, per-task accuracy, route assignments, drift, utilization, latency, throughput, and peak memory.
+      - name: continual_metrics
+        pseudocode: |
+          1. Build accuracy matrix A[t,k] from real test evaluations only.
+          2. Compute average incremental accuracy=mean_t(mean_{k<=t} A[t,k]).
+          3. Set primary_metric=-100*average_incremental_accuracy.
+          4. Compute final accuracy, forgetting, BWT, route-switch rate, and drift.
+      - name: summarize_seeds
+        pseudocode: |
+          1. Preserve paired per-seed raw values in pandas DataFrame.
+          2. Compute mean, sample standard deviation, paired effect size, and paired bootstrap 95% CI.
+          3. Use Wilcoxon only with at least ten paired observations; never use paired t-test below ten.
+          4. Use numpy 2.x-safe APIs; use np.trapezoid if integration is required.
+      - name: write_results
+        pseudocode: Serialize configuration, raw values, summaries, accounting, and failures atomically to results.json; plots use matplotlib error bars.
+
+  - name: main.py
+    generation_order: 5
+    dependencies: [config.py, data.py, methods.py, evaluate.py]
+    purpose: Sole entry point; sequentially executes every registered condition.
+    functions:
+      - name: build_condition
+        pseudocode: Map each registry name to its distinct strategy class; raise on unknown or prohibited names.
+      - name: validate_formal_prerequisites
+        pseudocode: |
+          1. Require actually detected CUDA device and report its queried properties.
+          2. Require readable real CIFAR-100 files, pinned pretrained ViT weights with checksum, and saved class orders.
+          3. Stop formal execution if any prerequisite is absent; never substitute random images or random ViT weights.
+      - name: main
+        pseudocode: |
+          1. Parse mode; instantiate and validate ExperimentConfig.
+          2. Print METRIC_DEF defining negative average incremental accuracy and its direction.
+          3. Print REGISTERED_CONDITIONS in execution order.
+          4. Start monotonic 300-second guard; smoke mode reserves teardown time.
+          5. For each condition sequentially and each seed with isolated Python, NumPy, and Torch RNG state:
+             a. Construct a fresh model and optimizer.
+             b. In smoke mode run only run_smoke_tests.
+             c. In formal mode train tasks 0..9 and evaluate all seen classes after each task.
+             d. Record raw metrics, accounting, elapsed time, and exceptions.
+             e. Stop safely before the deadline; never emit partial results as scientific conclusions.
+          6. Validate parameter/FLOPs matching before formal comparisons.
+          7. Write results.json and print per-seed values plus mean/std/bootstrap CI.
+          8. In smoke mode print only pass/fail, exception stacks, stored parameters, and analytical FLOPs.
+
+conditions:
+  - {name: calibrated_frozen_vit_ncm, class: CalibratedFrozenViTNCM, stage: formal}
+  - {name: single_shared_adapter, class: SingleSharedAdapter, stage: formal}
+  - {name: hard_top1_adapter_mixture, class: HardTop1AdapterMixture, stage: formal}
+  - {name: hard_top2_adapter_mixture, class: HardTop2AdapterMixture, stage: formal}
+  - {name: dense_softmax_adapter_mixture, class: DenseSoftmaxAdapterMixture, stage: formal}
+  - {name: append_only_key_value_adapter_memory, class: AppendOnlyAdapterMemory, stage: formal}
+  - {name: allocate_then_freeze_adapter_memory, class: AllocateThenFreezeMemory, stage: formal}
+  - {name: budget_matched_care_bilevel_routing, class: CaREInspiredBilevelRouting, stage: formal}
+  - {name: signed_top2_basis_memory, class: SignedTop2BasisMemory, stage: smoke_and_formal}
+  - {name: bounded_damage_aware_allocate_or_write, class: BoundedDamageAwareAllocateOrWrite, stage: smoke_and_formal}
+  - {name: no_route_hysteresis, class: SignedTop2NoHysteresis, stage: formal}
+  - {name: hard_top2_unsigned_basis_routing, class: UnsignedTop2BasisRouting, stage: formal}
+  - {name: novelty_gated_allocate_or_write, class: NoveltyGatedWrite, stage: formal}
+  - {name: nearest_slot_bounded_write, class: NearestSlotBoundedWrite, stage: formal}
+  - {name: frozen_old_slots, class: FrozenOldSlots, stage: formal}
+  - {name: no_write_allocate_then_freeze, class: NoWriteAllocateThenFreeze, stage: formal}
+
+verification_criteria:
+  - Exactly five Python files exist and main.py is the only entry point.
+  - Every concrete condition is a separate class with at least 20 effective implementation lines.
+  - Every child strategy overrides a core method with materially different logic.
+  - No class overrides nn.Module.train or nn.Module.eval.
+  - Data loading, model strategies, execution, and evaluation remain separated.
+  - Smoke inputs are [4,17,64], outputs are [4,10], and smoke reports contain no accuracy claims.
+  - Signed Top-2 activates exactly two bases and satisfies sum(abs(coefficients))=1 per sample.
+  - Persistent route EMA, prototypes, and memory writes use detached training-only statistics.
+  - Rejected writes restore keys, values, occupancy, drift, and counters transactionally.
+  - Allocated slots never exceed eight; erase, add, and cumulative-drift bounds are asserted.
+  - Stored-parameter mismatch is at most 2% and active-FLOPs mismatch at most 5%.
+  - Dense mixture reports full compute plus a separately rank-matched equal-compute condition.
+  - Formal inference receives neither task ID nor test-label-derived routing information.
+  - Formal execution is blocked without confirmed GPU, real CIFAR-100, pinned weights, and class orders.
+  - EWC, replay, PackNet, LoRA, CIFAR-10-C, and unrestricted writable memory are absent.
+  - NumPy 2.x removed aliases are absent; np.trapezoid and scipy.special.erfinv are used when needed.

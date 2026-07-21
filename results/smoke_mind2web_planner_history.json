@@ -1,0 +1,32 @@
+{
+  "model": "qwen3.6-35b-a3b",
+  "planner_model": "qwen3.6-35b-a3b",
+  "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+  "sample_limit": 1,
+  "action_limit": 1,
+  "subset_path": "Mind2Web/data/smoke_test_domain_0.json",
+  "skill_mode": "planner_history",
+  "task_count": 1,
+  "count": 1,
+  "element_acc": 1.0,
+  "action_acc": 1.0,
+  "step_acc": 1.0,
+  "outputs": [
+    {
+      "sample_id": "3f17e5ec-6570-4952-9ffc-ee756e557cdd_1fbb951e-2008-4089-b95f-40730a42f54b",
+      "split_file": "test_domain/test_domain_0.json",
+      "website": "reddit",
+      "task": "Find a latest post with more than 10k upvotes in r/announcements community and upvote it.",
+      "target_backend_id": "84",
+      "target_action": "CLICK",
+      "prediction_backend_id": "84",
+      "prediction_action": "CLICK",
+      "skill_mode": "planner_history",
+      "skill_context": "Current step oracle hint:\n- Next subgoal: interact with the searchbox labeled or described as \"Search all of Reddit\".\n- Target element role: searchbox.\n- Target visible text or label: Search all of Reddit.\n- Operation: CLICK.\n- Value: .\n- Do not use any candidate letter or backend node id from this hint; ground the hint in the HTML and choices.",
+      "planner_raw_response": "{\n  \"skill_context\": \"Current step oracle hint:\\n- Next subgoal: interact with the searchbox labeled or described as \\\"Search all of Reddit\\\".\\n- Target element role: searchbox.\\n- Target visible text or label: Search all of Reddit.\\n- Operation: CLICK.\\n- Value: .\\n- Do not use any candidate letter or backend node id from this hint; ground the hint in the HTML and choices.\"\n}",
+      "raw_response": "Answer: B.\nAction: CLICK",
+      "element_correct": true,
+      "action_correct": true
+    }
+  ]
+}

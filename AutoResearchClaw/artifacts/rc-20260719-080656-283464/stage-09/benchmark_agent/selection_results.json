@@ -1,0 +1,85 @@
+{
+  "selected_benchmarks": [
+    {
+      "name": "Split CIFAR-100",
+      "tier": 1,
+      "domain": "continual_learning",
+      "size_mb": 170,
+      "classes": 100,
+      "samples": 60000,
+      "metrics": [
+        "average_accuracy",
+        "forgetting_rate",
+        "backward_transfer"
+      ],
+      "api": "torchvision.datasets.CIFAR100(root='/workspace/data', download=False)",
+      "note": "Split into 10 or 20 tasks (10 or 5 classes each)",
+      "source_domain": "continual_learning",
+      "origin": "knowledge_base",
+      "role": "primary"
+    },
+    {
+      "name": "CIFAR-10-C",
+      "tier": 2,
+      "domain": "robustness",
+      "size_mb": 2700,
+      "classes": 10,
+      "metrics": [
+        "accuracy",
+        "mean_corruption_error"
+      ],
+      "api": "datasets.load_dataset('cifar10_corrupted', cache_dir='/workspace/data/hf')",
+      "note": "15 corruption types × 5 severity levels",
+      "source_domain": "transfer_learning",
+      "origin": "knowledge_base",
+      "role": "secondary"
+    }
+  ],
+  "selected_baselines": [
+    {
+      "name": "EWC",
+      "source": "Custom: Elastic Weight Consolidation (Fisher penalty)",
+      "paper": "Kirkpatrick et al., Overcoming catastrophic forgetting, PNAS 2017",
+      "pip": [],
+      "source_domain": "continual_learning",
+      "origin": "knowledge_base"
+    },
+    {
+      "name": "Experience Replay",
+      "source": "Custom: Maintain memory buffer of past examples",
+      "paper": "Chaudhry et al., Continual Learning with Tiny Episodic Memories, 2019",
+      "pip": [],
+      "source_domain": "continual_learning",
+      "origin": "knowledge_base"
+    },
+    {
+      "name": "PackNet",
+      "source": "Custom: Progressive pruning and re-training",
+      "paper": "Mallya & Lazebnik, PackNet, CVPR 2018",
+      "pip": [],
+      "source_domain": "continual_learning",
+      "origin": "knowledge_base"
+    },
+    {
+      "name": "LoRA",
+      "source": "peft.LoraConfig(r=16, lora_alpha=32, target_modules=['q_proj', 'v_proj'])",
+      "paper": "Hu et al., LoRA, ICLR 2022",
+      "pip": [
+        "peft"
+      ],
+      "source_domain": "llm_finetuning",
+      "origin": "knowledge_base"
+    },
+    {
+      "name": "Fine-tuning (lower bound)",
+      "origin": "required_baseline",
+      "pip": []
+    }
+  ],
+  "required_pip": [
+    "peft"
+  ],
+  "rationale": "Split CIFAR-100 is the strongest available domain-standard benchmark for class-incremental image classification and supports average accuracy, forgetting, and backward transfer. CIFAR-10-C is useful only as a secondary distribution-shift stress test for task-agnostic routing; Split MNIST and Permuted MNIST are too simple for meaningful pretrained-ViT expert-memory conclusions, while Office-31 primarily targets domain adaptation. EWC supplies the classic regularization baseline, Experience Replay is a strong classic rehearsal baseline, PackNet represents parameter isolation, and LoRA is the most relevant modern parameter-efficient adaptation baseline in the supplied list. QLoRA is omitted because its principal contribution is quantized language-model adaptation rather than continual ViT routing.",
+  "experiment_notes": "Use one frozen ImageNet-pretrained ViT and identical normalized classifiers, data orders, augmentations, and calibration for every condition. Resize CIFAR inputs according to the pretrained ViT specification. Evaluate 10-task and, if feasible, 20-task Split CIFAR-100 without task IDs. Match trainable/stored parameters and active FLOPs; separately report measured latency, throughput, and peak VRAM. Apply CIFAR-10-C only at evaluation time to measure routing robustness under corruption, not as evidence of class-incremental learning by itself. The 300-second budget is insufficient for a publishable multi-seed ViT study, so use it only for a smoke test or cached-feature pilot; final claims require at least five paired seeds, preferably ten, with average accuracy, final accuracy, forgetting, backward transfer, and routing diagnostics.",
+  "total_filtered": 9
+}

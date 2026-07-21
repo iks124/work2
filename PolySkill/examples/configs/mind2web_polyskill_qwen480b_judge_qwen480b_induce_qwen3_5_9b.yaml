@@ -1,0 +1,52 @@
+run_name: mind2web_polyskill_qwen480b_judge_qwen480b_induce_qwen3_5_9b
+skill_induction:
+  enabled: true
+  judge_method: webjudge_online_mind2web
+  judge_model:
+    provider: local
+    name: Qwen3-Coder-480B-A35B-Instruct
+    base_url: http://127.0.0.1:8002/v1
+    api_key: EMPTY
+    temperature: 0.0
+    max_tokens: 4096
+    timeout: 600
+    supports_vision: false
+  induction_model:
+    provider: local
+    name: Qwen3.5-9B
+    base_url: http://127.0.0.1:8003/v1
+    api_key: EMPTY
+    temperature: 0.0
+    max_tokens: 8192
+    timeout: 600
+    supports_vision: true
+  use_polymorphism: true
+  storage_path: ./results/mind2web_qwen480b_qwen3_5_9b_skills/
+  score_threshold: 3
+  use_reward_signal: false
+runner:
+  threads: 1
+  output_dir: ./results/mind2web_qwen480b_qwen3_5_9b
+  seed: 42
+  timeout_secs: 600
+model_configs:
+  qwen480b:
+    provider: local
+    name: Qwen3-Coder-480B-A35B-Instruct
+    base_url: http://127.0.0.1:8002/v1
+    api_key: EMPTY
+    temperature: 0.1
+    max_tokens: 4096
+    timeout: 600
+    supports_vision: false
+benchmarks:
+  mind2web-cross-task:
+    dataset: mind2web
+    setting: cross-task
+    max_examples: -1
+    max_steps: 30
+agents:
+  default:
+    name: hsm_v3
+    model_config_name: qwen480b
+    max_actions_per_step: 5

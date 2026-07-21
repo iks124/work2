@@ -1,0 +1,198 @@
+[
+  {
+    "figure_id": "fig_main_results",
+    "passed": false,
+    "issues": [
+      {
+        "type": "render_failure",
+        "message": "Script failed (exit 1): Traceback (most recent call last):\n  File \"/home/shihoukun/project/work2/AutoResearchClaw/artifacts/rc-20260719-080656-283464/stage-14/charts/scripts/fig_main_results.py\", line 16, in <module>\n    plt.rcParams.update({\n    ^^^\nNameError: name 'plt' is not defined\n"
+      }
+    ]
+  },
+  {
+    "figure_id": "fig_scale_ablation",
+    "passed": false,
+    "issues": [
+      {
+        "type": "visual_quality",
+        "severity": "critical",
+        "message": "The chart does not represent the stated scale ablation. It plots only one bar labeled \"metrics\" with value 90.055, rather than comparing the original scale against scale=0.1 for average accuracy, final accuracy, and forgetting."
+      },
+      {
+        "type": "visual_quality",
+        "severity": "critical",
+        "message": "The script constructs zero-width confidence intervals by setting ci_low and ci_high equal to the observation. No confidence interval exists because the experiment has one seed; drawing error bars falsely suggests uncertainty was estimated."
+      },
+      {
+        "type": "visual_quality",
+        "severity": "warning",
+        "message": "The 9 pt title is below the requested 12 pt minimum. Axis labels are 8 pt instead of at least 10 pt, and 7 pt tick labels are likely difficult to read when printed."
+      },
+      {
+        "type": "visual_quality",
+        "severity": "warning",
+        "message": "The y-axis label \"Metric Value (percentage points)\" is ambiguous because accuracy and forgetting have different interpretations. Separate panels or clearly grouped metrics are needed."
+      },
+      {
+        "type": "visual_quality",
+        "severity": "warning",
+        "message": "The x-axis category \"metrics\" is not a scale setting and conflicts with the x-axis label. Categories should identify the actual scale values, such as original scale and scale=0.1."
+      },
+      {
+        "type": "visual_quality",
+        "severity": "warning",
+        "message": "Displaying 90.0550 implies unsupported precision for a single-seed smoke run. Two decimal places would be more appropriate."
+      },
+      {
+        "type": "visual_quality",
+        "severity": "warning",
+        "message": "A single bar cannot communicate an ablation effect. A grouped bar chart with two scale conditions and separate accuracy metrics, plus a distinct forgetting panel, would better match the scientific claim."
+      },
+      {
+        "type": "visual_quality",
+        "severity": "warning",
+        "message": "The 300 DPI setting is publication-appropriate."
+      },
+      {
+        "type": "visual_quality",
+        "severity": "warning",
+        "message": "The selected palette is colorblind-safe and avoids default Matplotlib colors, although the current one-bar chart does not meaningfully use the palette."
+      },
+      {
+        "type": "visual_quality",
+        "severity": "warning",
+        "message": "constrained_layout=True is correctly used, and the light horizontal grid is clean and professional."
+      },
+      {
+        "type": "visual_quality",
+        "severity": "critical",
+        "message": "Overall quality score too low: 3/10"
+      }
+    ],
+    "issue_count": 11
+  },
+  {
+    "figure_id": "fig_balance_ablation",
+    "passed": false,
+    "issues": [
+      {
+        "type": "visual_quality",
+        "severity": "critical",
+        "message": "The figure does not show the specified load-balancing ablation. It contains one bar labeled \"metrics\" with value 90.055 instead of conditions for weights 0, 0.1, and 1.0."
+      },
+      {
+        "type": "visual_quality",
+        "severity": "critical",
+        "message": "The accuracy–forgetting trade-off is absent. The plot should show task-0, average, and final accuracy alongside forgetting, preferably using separate aligned panels because forgetting is on a different numerical scale."
+      },
+      {
+        "type": "visual_quality",
+        "severity": "critical",
+        "message": "Zero-width error bars are drawn by setting both confidence bounds equal to the observation. With one seed, confidence intervals cannot be estimated and error bars should be omitted."
+      },
+      {
+        "type": "visual_quality",
+        "severity": "warning",
+        "message": "The x-axis label says \"Load-Balancing Weight,\" but the sole tick is \"metrics.\" The ticks should be the evaluated weights 0, 0.1, and 1.0."
+      },
+      {
+        "type": "visual_quality",
+        "severity": "warning",
+        "message": "The generic y-axis label \"Metric Value (percentage points)\" obscures the distinction between accuracy levels and forgetting. Separate panels with \"Accuracy (%)\" and \"Forgetting (points)\" are recommended."
+      },
+      {
+        "type": "visual_quality",
+        "severity": "warning",
+        "message": "Axis-label sizes meet the 10 pt requirement, but the 11 pt title is below the requested 12 pt minimum. Tick and legend sizes are acceptable for a double-column figure but should be verified at final print scale."
+      },
+      {
+        "type": "visual_quality",
+        "severity": "warning",
+        "message": "The label 90.0550 implies unjustified precision for a single-seed, one-epoch smoke result. Two decimal places are sufficient."
+      },
+      {
+        "type": "visual_quality",
+        "severity": "warning",
+        "message": "No legend is present. A corrected multi-metric chart will require a clearly placed legend outside the plotting area or direct panel labels."
+      },
+      {
+        "type": "visual_quality",
+        "severity": "warning",
+        "message": "The script correctly uses constrained_layout=True, but the wide 7-by-3-inch canvas is poorly utilized by a single bar."
+      },
+      {
+        "type": "visual_quality",
+        "severity": "warning",
+        "message": "The colorblind-safe palette, 300 DPI output, white-grid styling, and light horizontal grid are appropriate, but these strengths cannot compensate for the incorrect data mapping."
+      },
+      {
+        "type": "visual_quality",
+        "severity": "critical",
+        "message": "Overall quality score too low: 3/10"
+      }
+    ],
+    "issue_count": 11
+  },
+  {
+    "figure_id": "fig_compute_comparison",
+    "passed": false,
+    "issues": [
+      {
+        "type": "visual_quality",
+        "severity": "critical",
+        "message": "The plotted value is incorrect. The script displays 90.055, which is an accuracy result, rather than the latency values 0.753 ms for sparse Signed Top-2 and 0.533 ms for dense softmax."
+      },
+      {
+        "type": "visual_quality",
+        "severity": "critical",
+        "message": "The required two-configuration comparison is missing. The chart should contain separate bars for sparse rank-16 Signed Top-2 and dense rank-4 softmax."
+      },
+      {
+        "type": "visual_quality",
+        "severity": "critical",
+        "message": "The script draws zero-width confidence intervals that were not estimated. Microbenchmark uncertainty should be based on repeated timed runs and shown as standard deviation, interquartile range, or a confidence interval; otherwise error bars must be omitted."
+      },
+      {
+        "type": "visual_quality",
+        "severity": "critical",
+        "message": "The sole x-axis tick, \"metrics,\" does not identify either routing configuration and makes the chart scientifically uninterpretable."
+      },
+      {
+        "type": "visual_quality",
+        "severity": "warning",
+        "message": "The 9 pt title is below the required 12 pt minimum, axis labels are 8 pt instead of at least 10 pt, and 7 pt tick labels are unlikely to remain readable at print size."
+      },
+      {
+        "type": "visual_quality",
+        "severity": "warning",
+        "message": "The long title is likely cramped in a 3.5-inch-wide single-column figure. It should be shortened or wrapped while retaining at least a 12 pt font."
+      },
+      {
+        "type": "visual_quality",
+        "severity": "warning",
+        "message": "The equal analytical FLOPs value is not represented in the chart. A concise annotation or tick-label qualifier should state that both configurations have 619,773,952 active FLOPs per layer, while the caption retains the parameter-mismatch caveat."
+      },
+      {
+        "type": "visual_quality",
+        "severity": "warning",
+        "message": "The current four-decimal value label is inappropriate. For the actual measurements, three decimals are justified because the supplied latencies are 0.753 and 0.533 ms."
+      },
+      {
+        "type": "visual_quality",
+        "severity": "warning",
+        "message": "A legend is unnecessary if the corrected bars have complete x-axis labels. If colors encode sparse versus dense routing, that encoding should remain redundant with the labels."
+      },
+      {
+        "type": "visual_quality",
+        "severity": "warning",
+        "message": "The 300 DPI setting, constrained layout, colorblind-safe palette, and light horizontal grid are appropriate, but the incorrect data mapping prevents the figure from passing."
+      },
+      {
+        "type": "visual_quality",
+        "severity": "critical",
+        "message": "Overall quality score too low: 2/10"
+      }
+    ],
+    "issue_count": 11
+  }
+]

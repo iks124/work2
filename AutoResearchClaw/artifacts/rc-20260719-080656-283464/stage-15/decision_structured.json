@@ -1,0 +1,6 @@
+{
+  "decision": "refine",
+  "raw_text_excerpt": "## Decision\n\nREFINE\n\n## Justification\n\nThe hypotheses remain plausible, and the `scale=0.1` result is a meaningful exploratory signal. However, the mandatory criteria for PROCEED are not satisfied:\n\n- Results are based on one seed, below the required three seeds per condition.\n- Hard and Signed Top-2 have identical per-seed Task-0 and Final values at the original scale, raising an ablation-integrity concern.\n- The proposed method\u2019s contribution is not isolated from residual scaling or ordinary l",
+  "quality_warnings": [],
+  "generated": "2026-07-19T18:33:31+00:00"
+}

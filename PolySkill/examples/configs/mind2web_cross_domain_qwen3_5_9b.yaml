@@ -1,0 +1,16 @@
+run_name: mind2web_cross_domain_qwen3_5_9b_fixed
+skill_induction:
+  enabled: true
+  judge_method: webjudge_online_mind2web
+  judge_model: {provider: local, name: Qwen3.5-9B, temperature: 0.0, max_tokens: 4096}
+  use_polymorphism: true
+  storage_path: ./results/mind2web_cross_domain_qwen3_5_9b_fixed_skills/
+  score_threshold: 3
+  use_reward_signal: false
+runner: {threads: 1, output_dir: ./results/mind2web_cross_domain_qwen3_5_9b_fixed, seed: 42, timeout_secs: 600}
+model_configs:
+  qwen3_5_9b: {provider: local, name: Qwen3.5-9B, temperature: 0.1, max_tokens: 2048}
+benchmarks:
+  mind2web-cross-domain: {dataset: mind2web, setting: cross-domain, max_examples: -1, max_steps: 30}
+agents:
+  default: {name: hsm_v3, model_config_name: qwen3_5_9b, max_actions_per_step: 5}

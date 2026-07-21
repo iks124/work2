@@ -1,0 +1,19 @@
+run_name: webarena_polyskill_gpt4
+skill_induction:
+  enabled: true
+  judge_method: webjudge_general
+  judge_model: {provider: openai, name: gpt-4.1, temperature: 0.0, max_tokens: 4096}
+  use_polymorphism: true
+  storage_path: ./results/webarena_skills/
+  score_threshold: 3
+  use_reward_signal: false
+runner: {threads: 1, output_dir: ./results/webarena, seed: 42, timeout_secs: 600}
+model_configs:
+  gpt4:   {provider: openai,    name: gpt-4.1,                    temperature: 0.1, max_tokens: 4096}
+  claude: {provider: anthropic, name: claude-3-7-sonnet-20250219, temperature: 0.1, max_tokens: 4096}
+  qwen:   {provider: local,     name: qwen3-coder-480b-a35b,      temperature: 0.1, max_tokens: 4096}
+  glm:    {provider: local,     name: glm-4.5,                    temperature: 0.1, max_tokens: 4096}
+benchmarks:
+  webarena-shopping: {dataset: webarena, category: shopping, max_examples: 187, max_steps: 30, headless: true, reset_env: false}
+agents:
+  default: {name: hsm_v3, model_config_name: gpt4, max_actions_per_step: 5}

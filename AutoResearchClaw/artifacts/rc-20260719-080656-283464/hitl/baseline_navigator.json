@@ -1,0 +1,33 @@
+{
+  "baselines": [
+    {
+      "name": "EWC",
+      "description": "",
+      "paper_url": "",
+      "code_url": "",
+      "is_standard": false,
+      "notes": "",
+      "added_by": "ai"
+    },
+    {
+      "name": "Experience Replay",
+      "description": "",
+      "paper_url": "",
+      "code_url": "",
+      "is_standard": false,
+      "notes": "",
+      "added_by": "ai"
+    },
+    {
+      "name": "PackNet",
+      "description": "",
+      "paper_url": "",
+      "code_url": "",
+      "is_standard": false,
+      "notes": "",
+      "added_by": "ai"
+    }
+  ],
+  "benchmarks": [],
+  "metrics": []
+}

@@ -1,0 +1,15 @@
+{
+  "stage_id": "09-experiment_design",
+  "run_id": "rc-20260719-083225-cf6fbc",
+  "status": "blocked_approval",
+  "decision": "block",
+  "output_artifacts": [
+    "exp_plan.yaml"
+  ],
+  "evidence_refs": [
+    "stage-09/exp_plan.yaml"
+  ],
+  "error": null,
+  "ts": "2026-07-19T08:48:48+00:00",
+  "next_stage": 9
+}

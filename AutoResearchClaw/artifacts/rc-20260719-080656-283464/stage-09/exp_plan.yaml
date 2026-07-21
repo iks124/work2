@@ -1,0 +1,526 @@
+objectives:
+  primary_question: >-
+    在无 task ID 推理的 Split CIFAR-100 10-task class-incremental setting 中，
+    检验固定容量的连续可微专家记忆能否在参数量与 active compute 匹配时，
+    优于校准后的无记忆模型、离散 adapter 路由、dense adapter mixture、
+    append-only memory、allocate-then-freeze 和 CaRE-inspired bi-level routing。
+  hypotheses:
+    - id: H1_basis_composition
+      statement: >-
+        在相同 classifier calibration、存储参数量和 active compute 下，
+        signed top-2 basis memory 在记忆饱和后优于 hard routed latent/adapter experts，
+        且旧类表示漂移更低。
+    - id: H2_damage_aware_writing
+      statement: >-
+        bounded damage-aware allocate-or-write 比 novelty-based 或 nearest-slot
+        writing 造成更小的旧类损伤；但 no-write 或 allocate-then-freeze
+        仍可能优于任何 occupied-slot writing。
+    - id: H3_routing_hysteresis
+      statement: >-
+        route hysteresis 应减少旧样本 route switching；只有同时改善准确率，
+        才能支持 routing stability 是遗忘的因果因素。
+    - id: H4_conditional_hierarchy
+      statement: >-
+        CaRE-inspired bi-level routing 的收益应主要出现在较大且冻结的专家库；
+        writable memory 中 flat content routing 可能更可靠。
+  matching_requirements:
+    stored_parameter_tolerance_percent: 2
+    active_compute_tolerance_percent: 5
+    matched_components:
+      - pretrained ViT backbone
+      - adapted transformer blocks
+      - classifier and calibration
+      - class order and data exposure
+      - optimizer and update count
+      - memory capacity
+    secondary_runtime_matching: >-
+      在正式 GPU 实验中另做 measured-latency-matched comparison；FLOPs 相等
+      不得被表述为 wall-clock latency 相等。
+
+datasets:
+  formal_experiment:
+    name: Split CIFAR-100 10-task
+    source: torchvision.datasets.CIFAR100
+    real_data_required: true
+    train_loading: "CIFAR100(root=DATA_ROOT, train=True, download=False)"
+    test_loading: "CIFAR100(root=DATA_ROOT, train=False, download=False)"
+    protocol:
+      num_tasks: 10
+      classes_per_task: 10
+      task_id_available_at_inference: false
+      train_test_split: official
+      class_orders: >-
+        至少 3 个预先生成并保存的 class orders；所有方法使用完全相同的 orders。
+      stream_variants:
+        - clean_task_separated
+        - boundary_free_interleaved
+      saturation_rule: >-
+        固定 memory capacity，并使可分配槽位在第 5 个 task 结束前后耗尽，
+        以显式评估 saturation 后的 reuse/write 行为。
+    preprocessing:
+      input_size: 224
+      train_transform:
+        - RandomResizedCrop(224)
+        - RandomHorizontalFlip
+        - pretrained_ViT_normalization
+      evaluation_transform:
+        - Resize(224)
+        - pretrained_ViT_normalization
+    restrictions:
+      - 不使用随机生成图像替代正式数据。
+      - 不把 test labels 用于路由、温度校准或 memory update。
+      - 不将 CIFAR-10-C 纳入本阶段的 class-incremental 主实验。
+  cpu_smoke_test:
+    name: Synthetic tensor unit-test fixture
+    research_benchmark: false
+    input_spec:
+      batch_size: 4
+      token_count: 17
+      embedding_dimension: 64
+      num_classes: 10
+      dtype: float32
+    permitted_uses:
+      - tensor shape validation
+      - forward and backward finite-value checks
+      - gradient-flow validation
+      - erase/add write-bound validation
+      - allocation-capacity validation
+      - stored-parameter accounting
+      - analytical active-FLOPs accounting
+    prohibited_uses:
+      - accuracy reporting
+      - forgetting or backward-transfer reporting
+      - method ranking
+      - hypothesis acceptance or rejection
+      - claims about pretrained ViTs or continual learning
+
+baselines:
+  direct_baselines:
+    - name: calibrated_frozen_vit_ncm
+      role: essential_no_memory_control
+      description: >-
+        真实预训练且冻结的 ViT 特征提取器，使用 L2-normalized nearest-class-mean
+        prototypes、共享 temperature calibration 和所有已见类别联合预测。
+      fairness: >-
+        所有 memory 方法必须使用相同 prototype update、normalization 和 calibration。
+      formal_gpu_stage: required
+      cpu_smoke_test: false
+
+    - name: single_shared_adapter
+      role: essential_shared_capacity_control
+      description: >-
+        所有类别共享一个参数预算匹配的低秩 adapter，不进行 routing 或 external memory。
+      fairness: >-
+        adapter 插入层、总存储参数和训练更新次数与候选方法匹配。
+      formal_gpu_stage: required
+      cpu_smoke_test: false
+
+    - name: hard_top1_adapter_mixture
+      role: essential_discrete_routing_control
+      description: >-
+        通过 content key 选择单个完整 adapter；使用 straight-through 或不可微
+        Top-1 路由，但不进行 soft composition。
+      fairness: >-
+        expert-bank 参数量与 basis/latent memory 匹配，active adapter rank 匹配。
+      formal_gpu_stage: required
+      cpu_smoke_test: false
+
+    - name: hard_topk_adapter_mixture
+      role: essential_sparse_mixture_control
+      description: >-
+        选择 K 个完整 adapters，并用归一化路由权重组合输出；K 与 signed basis
+        memory 的 active slot count 一致。
+      fairness: >-
+        active compute、K、存储参数量和 router size 与候选方法匹配。
+      formal_gpu_stage: required
+      cpu_smoke_test: false
+
+    - name: dense_softmax_adapter_mixture
+      role: essential_continuous_routing_control
+      description: >-
+        对全部 adapter experts 使用 dense softmax mixture，无 hard Top-K、
+        allocation 或 occupied-slot writing。
+      fairness: >-
+        报告完整 dense active FLOPs；另通过缩小 expert rank 构造 equal-active-compute
+        版本，避免把额外计算误认为 memory 机制收益。
+      formal_gpu_stage: required
+      cpu_smoke_test: false
+
+    - name: append_only_key_value_adapter_memory
+      role: essential_nonwritable_memory_control
+      description: >-
+        每个槽保存 immutable key 和完整 adapter value；只允许向空槽 append，
+        已占用槽不可 erase/add 更新。
+      fairness: >-
+        memory slot 数、key dimension、adapter rank 和总参数量与 writable memory 匹配。
+      formal_gpu_stage: required
+      cpu_smoke_test: false
+
+    - name: allocate_then_freeze_adapter_memory
+      role: essential_no_write_control
+      description: >-
+        空槽可按 allocation policy 分配；一旦分配，adapter 和 key 冻结。
+        容量耗尽后只允许读取，不允许修改旧槽。
+      fairness: >-
+        allocation count、槽容量、路由器和训练数据曝光与 damage-aware 方法匹配。
+      formal_gpu_stage: required
+      cpu_smoke_test: false
+
+    - name: budget_matched_care_bilevel_routing
+      role: essential_hierarchical_routing_control
+      description: >-
+        CaRE-inspired group-then-expert bi-level router，使用冻结 adapter experts；
+        不声称是官方 CaRE 复现，除非正式阶段严格匹配原论文和官方代码协议。
+      fairness: >-
+        总 router 参数、总 expert 参数、active expert count 和 active FLOPs
+        必须与 flat-routing comparison 匹配。
+      formal_gpu_stage: required
+      cpu_smoke_test: false
+
+  traditional_secondary_references:
+    - name: ewc_pretrained_vit
+      paper: "Kirkpatrick et al., Overcoming catastrophic forgetting, PNAS 2017"
+      status: secondary_only
+    - name: experience_replay_pretrained_vit
+      paper: "Chaudhry et al., Continual Learning with Tiny Episodic Memories, 2019"
+      status: secondary_only
+    - name: packnet_pretrained_vit
+      paper: "Mallya and Lazebnik, PackNet, CVPR 2018"
+      status: secondary_only
+    restriction: >-
+      EWC、Experience Replay 和 PackNet 不能替代上述 direct baselines，
+      也不能作为支持 expert-memory novelty 的唯一比较对象。
+
+  external_strong_baselines:
+    formal_gpu_stage_only: true
+    implementation_not_required_for_300s_smoke_test: true
+    methods:
+      - L2P
+      - DualPrompt
+      - CODA-Prompt
+      - EASE
+      - MOS
+    requirements:
+      - 使用原论文或官方代码，不凭方法名称自行猜测实现。
+      - 在正式文献核验后记录论文版本、venue、commit、backbone 和数据协议。
+      - 对无法统一 backbone 或协议的 published number 仅作参考，不声称直接可比。
+      - 若官方实现不能满足 task-agnostic inference，必须明确标注其 task-ID 假设。
+
+proposed_methods:
+  - name: signed_top2_basis_memory
+    hypothesis_alignment:
+      - H1_basis_composition
+      - H3_routing_hysteresis
+    description: >-
+      使用 signed content scores 选择绝对值最大的两个低秩 adapter bases，
+      归一化后组合为输入相关 adapter；正式版本加入 old-prototype route EMA
+      和 Jensen-Shannon hysteresis。
+    implementation_spec:
+      class_name: SignedTop2BasisMemory
+      key_methods:
+        - __init__
+        - route
+        - compose_adapter
+        - update_route_ema
+        - forward
+        - loss
+      algorithm_steps:
+        - 从冻结 ViT 表示或 smoke-test token embedding 生成 routing query。
+        - 计算 query 与 basis keys 的相似度。
+        - 按绝对相似度选择 top-2，并保留系数符号。
+        - 对两个低秩 bases 进行归一化组合。
+        - 将组合 adapter 应用于匹配的 projection。
+        - 正式实验中更新旧类 route EMA 并计算 hysteresis loss。
+      loss_function: >-
+        L = CE(logits, y) + lambda_hys * JS(r_current,
+        stopgrad(r_ema)) + lambda_bal * L_load_balance
+      key_hyperparameters:
+        basis_count: 8
+        active_bases: 2
+        basis_rank: 2
+        router_temperature: 0.2
+        hysteresis_weight: 0.05
+        route_ema_decay: 0.99
+        gradient_clip_norm: 1.0
+      differentiator: >-
+        组合两个 signed parameter bases，而不是选择完整 adapter 或对所有专家做 dense mixture。
+
+  - name: bounded_damage_aware_allocate_or_write
+    hypothesis_alignment:
+      - H2_damage_aware_writing
+      - H4_conditional_hierarchy
+    description: >-
+      使用低秩 gradient-damage proxy 决定分配空槽或更新占用槽；
+      erase gate、add norm 和累计槽漂移均有显式上界。
+    implementation_spec:
+      class_name: BoundedDamageAwareAllocateOrWrite
+      key_methods:
+        - __init__
+        - estimate_damage
+        - allocate_or_write
+        - bounded_erase_add
+        - route
+        - forward
+        - loss
+      algorithm_steps:
+        - 从当前 batch 计算 query 和 candidate update。
+        - 用受保护旧原型或正式 replay-free gradient sketch 估计 prospective damage。
+        - 若存在空槽且 damage 超阈值，则分配新槽。
+        - 否则选择 estimated damage 最小的合法占用槽。
+        - 对 erase gate、add norm 和槽累计漂移进行 clamp。
+        - 若更新违反 finite-value 或边界检查，则拒绝写入并回滚。
+      loss_function: >-
+        L = CE(logits, y) + lambda_damage * max(0, damage - delta)
+        + lambda_write * ||write||_2^2
+      key_hyperparameters:
+        slot_count: 8
+        adapter_rank: 4
+        gradient_sketch_rank: 4
+        damage_threshold: 0.02
+        erase_gate_max: 0.1
+        add_norm_max: 0.05
+        cumulative_slot_drift_max: 0.2
+        gradient_clip_norm: 1.0
+      differentiator: >-
+        写入目标由 prospective old-knowledge damage 决定，并对 erase/add
+        及累计漂移施加可测试的硬边界。
+
+ablations:
+  - name: no_route_hysteresis
+    parent_method: signed_top2_basis_memory
+    what_is_removed: Historical-route EMA and Jensen-Shannon hysteresis penalty
+    how_it_differs: >-
+      设置 hysteresis_weight=0，跳过 update_route_ema；保留相同 signed top-2 routing。
+    expected_effect: >-
+      route switching 应增加；若准确率不变，则 route stability 的因果主张不成立。
+    formal_gpu_stage: required
+
+  - name: hard_top2_unsigned_basis_routing
+    parent_method: signed_top2_basis_memory
+    what_is_removed: Signed coefficients and continuous signed composition
+    how_it_differs: >-
+      将选中系数截断为非负值并归一化，其他 basis 参数与 active compute 不变。
+    expected_effect: >-
+      检验收益来自 basis sharing 本身还是 signed cancellation/composition。
+    formal_gpu_stage: required
+
+  - name: novelty_gated_allocate_or_write
+    parent_method: bounded_damage_aware_allocate_or_write
+    what_is_removed: Low-rank protected-gradient damage estimator
+    how_it_differs: >-
+      以 1 - maximum cosine key similarity 作为 allocation/write 信号；
+      erase/add 边界保持不变。
+    expected_effect: >-
+      若视觉新颖度不能代表干扰风险，则 protected old-class loss increase 应更高。
+    formal_gpu_stage: required
+
+  - name: nearest_slot_bounded_write
+    parent_method: bounded_damage_aware_allocate_or_write
+    what_is_removed: Damage-aware target selection
+    how_it_differs: >-
+      在初始空槽填满后始终更新 cosine-nearest slot，但保留相同 erase/add bounds。
+    expected_effect: >-
+      隔离 target selection 的收益，避免把 bounded writing 本身与 damage estimator 混淆。
+    formal_gpu_stage: required
+
+  - name: frozen_old_slots
+    parent_method: bounded_damage_aware_allocate_or_write
+    what_is_removed: Permission to modify any slot allocated by a previous task
+    how_it_differs: >-
+      旧槽的 key、adapter value 和 optimizer state 均冻结；仅当前 task 新分配槽可更新。
+    expected_effect: >-
+      检验 occupied-slot writing 是否是遗忘的主要来源。
+    formal_gpu_stage: required
+
+  - name: no_write_allocate_then_freeze
+    parent_method: bounded_damage_aware_allocate_or_write
+    what_is_removed: All erase/add writes to occupied slots
+    how_it_differs: >-
+      只向空槽 allocation，分配后立即冻结；槽满后保持 read-only。
+    expected_effect: >-
+      若 no-write 优于 damage-aware writing，则应否定“安全写入足以解决干扰”的主张。
+    formal_gpu_stage: required
+
+  - name: flat_router_for_frozen_experts
+    parent_method: budget_matched_care_bilevel_routing
+    what_is_removed: Upper-level group router
+    how_it_differs: >-
+      用一个参数预算匹配的 flat content router 直接寻址所有 experts，
+      active expert count 保持不变。
+    expected_effect: >-
+      与 bi-level router 的差异用于隔离 hierarchy，而非额外 router capacity。
+    formal_gpu_stage: required
+
+controls:
+  oracle_routing:
+    class_aware_oracle:
+      description: >-
+        使用真实类别选择最优专家，仅作为可能含标签泄漏的诊断上界。
+      restriction: 不得作为可部署 task-agnostic 方法或主要结果。
+    label_free_prototype_oracle:
+      description: >-
+        使用仅由历史训练样本构建的 class prototypes 选择路由，
+        不读取测试标签或 task ID。
+      role: 主要 routing opportunity diagnostic。
+    decomposition:
+      - normal_learned_router_and_memory
+      - frozen_router_updated_memory
+      - updated_router_frozen_memory
+      - frozen_router_frozen_memory
+  write_controls:
+    - frozen_old_slots
+    - no_write_allocate_then_freeze
+    - append_only_key_value_adapter_memory
+  capacity_controls:
+    - equal_stored_parameters
+    - equal_active_compute
+    - identical_memory_saturation_point
+
+metrics:
+  formal_primary_metric:
+    name: negative_average_incremental_accuracy
+    direction: minimize
+    units: negative_percentage_points
+    definition: >-
+      对 10 个 task evaluation checkpoints 的 top-1 accuracy 取平均后乘以 -1；
+      数值越低表示 average incremental accuracy 越高。
+  formal_secondary_metrics:
+    - final_top1_accuracy
+    - average_forgetting
+    - backward_transfer
+    - old_class_loss_increase
+    - old_prototype_cosine_drift
+    - expert_output_drift
+    - route_switch_rate
+    - label_free_routing_gap
+    - stored_parameter_count
+    - active_forward_flops
+    - measured_latency
+    - throughput
+    - peak_memory
+    - write_rejection_rate
+    - slot_utilization
+  smoke_test_metrics:
+    - output_shape_matches_num_classes
+    - all_forward_values_finite
+    - all_required_gradients_finite
+    - nonzero_gradient_reaches_router_and_memory
+    - erase_gate_within_declared_bound
+    - add_vector_norm_within_declared_bound
+    - cumulative_slot_drift_within_declared_bound
+    - allocation_never_exceeds_capacity
+    - stored_parameter_count
+    - analytical_active_flops
+  smoke_test_reporting_restriction: >-
+    300 秒 smoke test 只报告 pass/fail、异常栈、参数量和解析 FLOPs；
+    不报告 accuracy、forgetting、BWT、方法优劣或研究结论。
+  formal_statistics:
+    minimum_seeds: 3
+    preferred_seeds: 5
+    publication_target_seeds: 10
+    paired_design: >-
+      方法间共享 class order、初始化 seed 和 data-loader seed。
+    reporting:
+      - per-seed raw values
+      - mean and standard deviation
+      - 95 percent bootstrap confidence interval
+      - paired effect size
+    tests: >-
+      当 paired seeds 少于 10 时不使用 paired t-test；优先 paired bootstrap。
+      若至少有 10 个配对观测，可补充 Wilcoxon signed-rank test。
+
+compute_budget:
+  detected_hardware:
+    gpu: unknown/not detected
+    gpu_count: unknown/not detected
+    cpu: available but model and core count not characterized
+    distributed_training: false
+  current_limit_seconds: 300
+  allowed_execution: cpu_compatible_smoke_test_only
+  smoke_test:
+    candidates:
+      - signed_top2_basis_memory
+      - bounded_damage_aware_allocate_or_write
+    data: synthetic tensors used only as unit-test fixtures
+    pretrained_vit: false
+    real_dataset_training: false
+    target_runtime_seconds:
+      shared_setup: 30
+      signed_top2_basis_memory_tests: 90
+      bounded_damage_aware_allocate_or_write_tests: 120
+      teardown_and_report: 30
+      total: 270
+      contingency: 30
+    required_assertions:
+      - exact output and adapter tensor shapes
+      - finite forward loss
+      - finite backward gradients
+      - router and memory receive nonzero gradients
+      - top-2 routing activates exactly two bases
+      - signed coefficients remain normalized
+      - allocation count never exceeds slot capacity
+      - erase gate never exceeds erase_gate_max
+      - add norm never exceeds add_norm_max
+      - rejected writes leave slot state unchanged
+      - stored-parameter accounting matches enumerated parameters
+      - analytical active-FLOPs accounting is deterministic
+    inferential_use: none
+  formal_experiment:
+    status: blocked_pending_resources
+    prerequisites:
+      - 确认可用 GPU 及其显存；不得根据先前环境描述虚构硬件。
+      - 确认真实 CIFAR-100 可访问。
+      - 下载并校验真实预训练 ViT 权重。
+      - 锁定 direct baselines 和 external strong baselines 的实现版本。
+      - 为每个正式条件提供至少 3 seeds，优先 5 至 10 seeds。
+      - 在实测单次运行时间后重新计算总预算。
+    runtime_seconds: unknown
+    hardware_claim: none
+    restriction: >-
+      在 GPU、权重、数据和单次运行时间得到实际确认前，不声称正式实验可在
+      300 秒内运行，也不填写推测性 GPU 型号、显存或完成时间。
+
+risks:
+  - name: no_detected_gpu
+    consequence: >-
+      当前环境不能支持真实预训练 ViT 的正式多条件训练结论。
+    mitigation: >-
+      仅执行 CPU-compatible unit smoke test；正式实验等待 GPU 被实际检测并确认。
+  - name: pretrained_weight_unavailable
+    consequence: 随机初始化 ViT 不可替代研究主题要求的真实预训练 ViT。
+    mitigation: >-
+      正式实验前下载固定版本权重、记录来源和 checksum；失败时停止正式实验。
+  - name: baseline_protocol_mismatch
+    consequence: >-
+      L2P、DualPrompt、CODA-Prompt、EASE、MOS 或 CaRE 的 task-ID、
+      backbone、classifier 与数据划分差异会造成不可比结果。
+    mitigation: >-
+      从原论文和官方代码核验协议；统一复现失败时明确标注，不拼接 SOTA 数值。
+  - name: parameter_or_compute_mismatch
+    consequence: 额外容量或 dense compute 可能被误判为 memory 机制收益。
+    mitigation: >-
+      在训练前自动断言存储参数误差不超过 2%，active FLOPs 误差不超过 5%；
+      正式阶段补充 measured-latency matching。
+  - name: slot_collapse
+    consequence: 多数输入可能只访问少数槽，导致名义容量与有效容量不一致。
+    mitigation: 报告 slot utilization、routing entropy、dead-slot count 和 load distribution。
+  - name: destructive_write
+    consequence: occupied-slot writing 可能不可逆地损伤旧类。
+    mitigation: >-
+      强制 erase/add/cumulative-drift bounds，并保留 frozen-old-slots、
+      no-write 和 append-only controls。
+  - name: oracle_label_leakage
+    consequence: class-aware oracle 会夸大 practical routing opportunity。
+    mitigation: >-
+      将其标记为 leakage-prone upper bound，并以 label-free prototype oracle
+      作为主要 routing diagnostic。
+  - name: numerical_instability
+    consequence: signed composition 或 erase/add 更新可能产生 NaN 或梯度爆炸。
+    mitigation: >-
+      使用 float32 smoke test、finite assertions、gradient clipping、
+      bounded writes 和 transactional rollback；出现非有限值立即判定测试失败。
+  - name: insufficient_seeds
+    consequence: 3 seeds 只能提供初步证据，难以稳定估计小效应。
+    mitigation: >-
+      3 seeds 是正式执行的最低门槛；资源允许时扩展到 5 至 10 seeds，
+      并报告全部 seed 结果及 bootstrap uncertainty。

@@ -1,0 +1,14 @@
+{
+  "requirements": "",
+  "benchmark_names": [
+    "Split CIFAR-100",
+    "CIFAR-10-C"
+  ],
+  "baseline_names": [
+    "EWC",
+    "Experience Replay",
+    "PackNet",
+    "LoRA",
+    "Fine-tuning (lower bound)"
+  ]
+}

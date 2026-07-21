@@ -1,0 +1,52 @@
+# PolySkill Requirements
+# Core dependencies for polymorphic skill induction in web agents
+
+# Core Web Agent Dependencies
+playwright>=1.40.0
+browsergym-core
+browsergym-webarena
+browsergym-miniwob  # used only by the offline test suite (not a paper benchmark)
+browsergym-experiments
+
+# LLM and AI
+openai>=1.0.0
+anthropic>=0.18.0
+litellm>=1.40
+
+# Data Processing
+pandas>=2.0.0
+numpy>=1.24.0
+pyyaml>=6.0
+jsonlines>=3.1.0
+
+# Pydantic (schema validation)
+pydantic>=2
+
+# Utilities
+fire>=0.5.0
+tqdm>=4.66.0
+python-dotenv>=1.0.0
+pyparsing
+faker
+
+# Web Scraping and Processing
+beautifulsoup4>=4.12.0
+lxml>=4.9.0
+
+# Image processing
+pillow
+
+# Logging and Monitoring
+rich>=13.0.0
+loguru>=0.7.0
+
+# Optional [retrieval] — not needed for the default agent
+# torch>=2.0.0
+# transformers>=4.35.0
+# sentence-transformers>=2.2.0
+
+# Development Dependencies
+pytest>=7.4.0
+black>=23.0.0
+flake8>=6.0.0
+mypy>=1.5.0

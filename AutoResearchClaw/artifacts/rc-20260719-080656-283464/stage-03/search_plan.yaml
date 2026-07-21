@@ -1,0 +1,54 @@
+topic: "NTM-style differentiable expert memory for task-agnostic class-incremental learning with pretrained Vision Transformers"
+generated: "2026-07-19T08:25:00+00:00"
+search_strategies:
+  - name: foundational_memory
+    max_results_per_query: 40
+    sources: [openalex, semantic_scholar, arxiv]
+    queries:
+      - '"Neural Turing Machines" Graves Wayne Danihelka'
+      - '"Hybrid computing using a neural network with dynamic external memory"'
+      - '"Differentiable Neural Computer" memory allocation temporal linkage'
+      - 'differentiable external memory neural network content addressing erase add'
+      - 'writable key value memory neural network continual learning'
+  - name: direct_continual_learning
+    max_results_per_query: 40
+    sources: [openalex, semantic_scholar, arxiv]
+    queries:
+      - '"Scaling Continual Learning to 300+ Tasks with Bi-Level Routing Mixture-of-Experts"'
+      - 'task-agnostic class-incremental learning differentiable memory'
+      - 'class-incremental learning external memory pretrained vision transformer'
+      - 'continual learning mixture of experts dynamic routing adapters'
+      - 'continual learning expert expansion reuse adapter routing'
+      - 'parameter isolation parameter generation continual learning hypernetwork'
+  - name: prompt_adapter_baselines
+    max_results_per_query: 30
+    sources: [openalex, semantic_scholar, arxiv]
+    queries:
+      - '"Learning to Prompt for Continual Learning" L2P'
+      - '"DualPrompt" continual learning'
+      - '"CODA-Prompt" continual learning'
+      - '"Expandable Subspace Ensemble" EASE class-incremental learning'
+      - 'APER adapter class-incremental learning pretrained models'
+      - 'MOS adapter merging class-incremental learning'
+      - 'TUNA task-specific adapters continual learning'
+      - 'MIN parameter drift continual learning adapter'
+      - 'SEMA self-expansion adapter class-incremental learning'
+      - 'MoAL mixture of adapters continual learning'
+  - name: latent_parameterization
+    max_results_per_query: 40
+    sources: [openalex, semantic_scholar, arxiv]
+    queries:
+      - 'hypernetwork generated adapters continual learning'
+      - 'latent parameter memory neural network hypernetwork'
+      - 'low rank adapter basis composition mixture of adapters'
+      - 'dynamic parameter generation adapter routing vision transformer'
+      - 'soft routing versus top-k mixture of experts continual learning'
+      - 'compositional parameter efficient modules continual learning'
+filters:
+  min_year: 2014
+  language: [en]
+  peer_review_preferred: true
+  include_preprints_for_recent_work: true
+deduplication:
+  method: title_doi_hash
+  fuzzy_threshold: 0.9

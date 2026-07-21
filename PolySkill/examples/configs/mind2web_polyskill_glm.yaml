@@ -1,0 +1,19 @@
+run_name: mind2web_polyskill_glm
+skill_induction:
+  enabled: true
+  judge_method: webjudge_online_mind2web
+  judge_model: {provider: openai, name: gpt-4.1, temperature: 0.0, max_tokens: 4096}
+  use_polymorphism: true
+  storage_path: ./results/mind2web_skills/
+  score_threshold: 3
+  use_reward_signal: false
+runner: {threads: 1, output_dir: ./results/mind2web, seed: 42, timeout_secs: 600}
+model_configs:
+  gpt4:   {provider: openai,    name: gpt-4.1,                    temperature: 0.1, max_tokens: 4096}
+  claude: {provider: anthropic, name: claude-3-7-sonnet-20250219, temperature: 0.1, max_tokens: 4096}
+  qwen:   {provider: local,     name: qwen3-coder-480b-a35b,      temperature: 0.1, max_tokens: 4096}
+  glm:    {provider: local,     name: glm-4.5,                    temperature: 0.1, max_tokens: 4096}
+benchmarks:
+  mind2web-cross-task: {dataset: mind2web, setting: cross-task, max_examples: -1, max_steps: 30}
+agents:
+  default: {name: hsm_v3, model_config_name: glm, max_actions_per_step: 5}

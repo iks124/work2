@@ -1,0 +1,59 @@
+[
+  {
+    "figure_id": "fig_main_results",
+    "passed": false,
+    "issues": [
+      {
+        "type": "render_failure",
+        "message": "Script failed (exit 1): Traceback (most recent call last):\n  File \"/home/shihoukun/project/work2/AutoResearchClaw/artifacts/rc-20260719-080656-283464/stage-14/charts/scripts/fig_main_results.py\", line 16, in <module>\n    plt.rcParams.update({\n    ^^^\nNameError: name 'plt' is not defined\n"
+      }
+    ]
+  },
+  {
+    "figure_id": "fig_scale_ablation",
+    "passed": false,
+    "issues": [
+      {
+        "type": "render_failure",
+        "message": "Script failed (exit 1): Traceback (most recent call last):\n  File \"/home/shihoukun/project/work2/AutoResearchClaw/artifacts/rc-20260719-080656-283464/stage-14/charts/scripts/fig_scale_ablation.py\", line 16, in <module>\n    plt.rcParams.update({\n    ^^^\nNameError: name 'plt' is not defined\n"
+      }
+    ]
+  },
+  {
+    "figure_id": "fig_balance_ablation",
+    "passed": false,
+    "issues": [
+      {
+        "type": "render_failure",
+        "message": "Script failed (exit 1): Traceback (most recent call last):\n  File \"/home/shihoukun/project/work2/AutoResearchClaw/artifacts/rc-20260719-080656-283464/stage-14/charts/scripts/fig_balance_ablation.py\", line 16, in <module>\n    plt.rcParams.update({\n    ^^^\nNameError: name 'plt' is not defined\n"
+      }
+    ]
+  },
+  {
+    "figure_id": "fig_compute_comparison",
+    "passed": false,
+    "issues": [
+      {
+        "type": "numerical_accuracy",
+        "severity": "critical",
+        "message": "Script may not contain correct data values. Expected values like [90.055] not found in script. Found values: []"
+      },
+      {
+        "type": "visual_quality",
+        "severity": "warning",
+        "message": "No variability is shown for the latency measurements. If repeated microbenchmark runs are available, report dispersion or confidence intervals; otherwise the chart should be described as showing single reported measurements."
+      },
+      {
+        "type": "visual_quality",
+        "severity": "warning",
+        "message": "The configurations match analytical active FLOPs but not stored parameter counts, so the figure supports a latency comparison only under the stated FLOPs condition, not a fully budget-matched efficiency claim."
+      },
+      {
+        "type": "visual_quality",
+        "severity": "warning",
+        "message": "The tick labels round 619,773,952 FLOPs to 619.8M. This is readable and acceptable, but the exact value should remain available in the caption or table."
+      }
+    ],
+    "issue_count": 4
+  }
+]

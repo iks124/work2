@@ -1,0 +1,13 @@
+{
+  "passed": false,
+  "errors": [
+    "data_loader: SyntaxError at line 1: invalid syntax",
+    "baseline: SyntaxError at line 1: invalid syntax"
+  ],
+  "warnings": [
+    "baseline: import '__future__' not in Docker image or requirements"
+  ],
+  "severity": "error",
+  "llm_review": {},
+  "suggestions": []
+}

@@ -1,0 +1,10 @@
+{
+  "metrics": {
+    "stored_parameter_count": 5249,
+    "analytical_active_flops": 566272
+  },
+  "elapsed_sec": 0.76,
+  "time_budget_sec": 300,
+  "steps_completed": 0,
+  "nan_count": 0
+}

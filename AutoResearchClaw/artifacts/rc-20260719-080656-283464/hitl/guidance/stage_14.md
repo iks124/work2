@@ -1,0 +1,1 @@
+分析真实 CaRE 工程 smoke 结果，禁止把单 seed/单 epoch 当正式结论。重点诊断：Signed 与 Hard 几乎相同；三种 basis 均落后 CaRE；adapter scale=1e-3；CaRE 有 shared adapter 而 basis 没有；Signed/Hard rank16 与 Dense rank4 仅 active FLOPs 匹配、stored params 未匹配；检查 route overlap、route entropy/load、scale/gradient magnitude、basis utilization、shared-adapter control 和分类器对齐。输出最小下一轮实验，不得进入 writer 或 NTM erase/add。

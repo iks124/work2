@@ -1,0 +1,9 @@
+{
+  "workbench.editorAssociations": {
+    "*.md": "vscode.markdown.preview.editor",
+    "*.copilotmd": "vscode.markdown.preview.editor"
+  },
+  "editor.inlineSuggest.enabled": false,
+  "python.terminal.activateEnvironment": false,
+  "python-envs.terminal.autoActivationType": "off"
+}

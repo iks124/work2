@@ -1,0 +1,23 @@
+run_name: self_proposing_shopping_gpt4
+skill_induction:
+  enabled: true
+  judge_method: webjudge_general
+  use_polymorphism: true
+  storage_path: ./results/self_proposing_skills/
+  score_threshold: 3
+exploration:
+  domain: shopping
+  max_iterations: 150
+  exploration_strategy: structured
+  task_complexity_schedule: gradual
+  novelty_bonus: 0.2
+  use_abstract_classes: true
+  websites: [webarena_shopping, amazon, target]
+  temperature: 0.3
+runner: {threads: 1, output_dir: ./results/self_proposing, seed: 42, timeout_secs: 300}
+model_configs:
+  gpt4: {provider: openai, name: gpt-4.1, temperature: 0.3, max_tokens: 4096}
+benchmarks:
+  exploration-placeholder: {dataset: webarena, category: shopping, max_examples: 1, max_steps: 30}
+agents:
+  explorer: {name: hsm_v3_explorer, model_config_name: gpt4, max_actions_per_step: 5}

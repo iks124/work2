@@ -1,0 +1,29 @@
+{
+  "real_search": true,
+  "queries_used": [
+    "\"Neural Turing Machines\" Graves Wayne Danihelka",
+    "\"Hybrid computing using a neural network with dynamic external memory\"",
+    "\"Scaling Continual Learning to 300+ Tasks with Bi-Level Routing Mixture-of-Experts\"",
+    "task-agnostic class-incremental learning differentiable memory",
+    "class-incremental learning external memory pretrained vision transformer",
+    "continual learning mixture of experts dynamic routing adapters",
+    "hypernetwork generated adapters continual learning",
+    "latent parameter memory neural network hypernetwork",
+    "low rank adapter basis composition mixture of adapters",
+    "writable key value memory neural network continual learning",
+    "\"Learning to Prompt for Continual Learning\" L2P",
+    "\"DualPrompt\" continual learning",
+    "\"CODA-Prompt\" continual learning",
+    "\"Expandable Subspace Ensemble\" EASE class-incremental learning",
+    "APER adapter class-incremental learning pretrained models",
+    "MOS adapter merging class-incremental learning",
+    "TUNA task-specific adapters continual learning",
+    "MIN parameter drift continual learning adapter",
+    "SEMA self-expansion adapter class-incremental learning",
+    "MoAL mixture of adapters continual learning"
+  ],
+  "year_min": 2014,
+  "total_candidates": 571,
+  "bibtex_entries": 567,
+  "ts": "2026-07-19T08:24:53+00:00"
+}

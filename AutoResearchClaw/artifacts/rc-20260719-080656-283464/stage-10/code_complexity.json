@@ -1,0 +1,8 @@
+{
+  "code_complexity_warnings": [
+    "[config.py] Class 'ExperimentConfig' has only 1 non-dunder method(s) \u2014 algorithm classes should have at least __init__ + one core method (forward/train_step/predict)",
+    "[data.py] Class 'SplitCIFAR100DataModule' has only 1 non-dunder method(s) \u2014 algorithm classes should have at least __init__ + one core method (forward/train_step/predict)",
+    "[config.py] Filename shadows stdlib/pip package 'config'. Rename to e.g. 'config_config.py' or 'experiment_config.py' to avoid import collisions at runtime.",
+    "[REPAIR] Deep repair fixed -1/1 critical issues"
+  ]
+}

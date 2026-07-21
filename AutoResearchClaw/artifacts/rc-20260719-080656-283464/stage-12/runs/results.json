@@ -1,0 +1,123 @@
+{
+  "status": "completed_smoke_only",
+  "research_claim_allowed": false,
+  "primary_metric": 90.055,
+  "metrics": {
+    "average_accuracy": 90.055,
+    "final_accuracy": 88.89,
+    "forgetting": 3.22
+  },
+  "protocol": {
+    "dataset": "CIFAR-100",
+    "class_split": "50+50",
+    "backbone": "ViT-B/16-IN21K",
+    "inference": "task-agnostic",
+    "seed": 1993,
+    "epochs_per_phase": 1,
+    "purpose": "engineering smoke and early degradation diagnosis only"
+  },
+  "conditions": {
+    "care": {
+      "task0_top1": 93.4,
+      "final_top1": 89.7,
+      "average_accuracy": 91.55,
+      "forgetting": 2.96,
+      "log": "external/CaRE/logs/care/care_cifar100_smoke_2task/20260719-182028/cifar224/0/50/summary.log"
+    },
+    "signed_top2_basis_rank16": {
+      "task0_top1": 88.42,
+      "final_top1": 83.91,
+      "average_accuracy": 86.165,
+      "forgetting": 3.76,
+      "log": "external/CaRE/logs/care/basis_signed_top2_cifar100_smoke_2task/20260720-001904/cifar224/0/50/summary.log"
+    },
+    "hard_top2_basis_rank16": {
+      "task0_top1": 88.42,
+      "final_top1": 83.91,
+      "average_accuracy": 86.165,
+      "forgetting": 3.78,
+      "log": "external/CaRE/logs/care/basis_hard_top2_cifar100_smoke_2task/20260720-003038/cifar224/0/50/summary.log"
+    },
+    "dense_softmax_basis_rank4_equal_active_flops": {
+      "task0_top1": 87.84,
+      "final_top1": 83.74,
+      "average_accuracy": 85.79,
+      "forgetting": 3.16,
+      "log": "external/CaRE/logs/care/basis_dense_softmax_cifar100_smoke_2task/20260720-004227/cifar224/0/50/summary.log"
+    },
+    "hard_top2_scale01": {
+      "task0_top1": 91.22,
+      "final_top1": 88.89,
+      "average_accuracy": 90.055,
+      "forgetting": 3.22,
+      "log": "external/CaRE/logs/care/basis_hard_top2_scale01_cifar100_smoke_2task/20260720-020300/cifar224/0/50/summary.log"
+    },
+    "no_adapter": {
+      "task0_top1": 88.42,
+      "final_top1": 83.93,
+      "average_accuracy": 86.175,
+      "forgetting": 3.76,
+      "log": "external/CaRE/logs/care/no_adapter_cifar100_smoke_2task/20260720-023503/cifar224/0/50/summary.log"
+    },
+    "fixed_top2_scale01": {
+      "task0_top1": 89.42,
+      "final_top1": 87.98,
+      "average_accuracy": 88.7,
+      "forgetting": 1.88,
+      "log": "external/CaRE/logs/care/basis_fixed_top2_scale01_cifar100_smoke_2task/20260720-023503/cifar224/0/50/summary.log"
+    },
+    "signed_top2_scale01": {
+      "task0_top1": 90.6,
+      "final_top1": 88.31,
+      "average_accuracy": 89.455,
+      "forgetting": 2.9,
+      "log": "external/CaRE/logs/care/basis_signed_top2_scale01_cifar100_smoke_2task/20260720-020300/cifar224/0/50/summary.log"
+    },
+    "hard_top2_scale01_balance01": {
+      "task0_top1": 88.52,
+      "final_top1": 86.57,
+      "average_accuracy": 87.545,
+      "forgetting": 1.0,
+      "log": "external/CaRE/logs/care/basis_hard_top2_scale01_balance01_smoke_2task/20260720-021254/cifar224/0/50/summary.log"
+    },
+    "hard_top2_scale01_balance1": {
+      "task0_top1": 88.44,
+      "final_top1": 85.41,
+      "average_accuracy": 86.925,
+      "forgetting": 2.14,
+      "log": "external/CaRE/logs/care/basis_hard_top2_scale01_balance1_smoke_2task/20260720-021254/cifar224/0/50/summary.log"
+    }
+  },
+  "engineering_checks": {
+    "unit_tests_passed": 9,
+    "unit_tests_total": 9,
+    "full_vit_forward_backward": true,
+    "strict_top2_sparsity": true,
+    "finite_nonzero_basis_gradients": true,
+    "fixed_basis_capacity_across_tasks": true,
+    "cuda_amp_regression_passed": true,
+    "sparse_compute_after_routing": true
+  },
+  "compute": {
+    "signed_rank16_active_flops_per_layer_batch32_tokens197": 619773952,
+    "dense_rank4_active_flops_per_layer_batch32_tokens197": 619773952,
+    "signed_microbenchmark_ms_per_layer": 0.753,
+    "dense_microbenchmark_ms_per_layer": 0.533,
+    "warning": "Equal analytical FLOPs do not imply equal latency; stored parameters are not yet matched between sparse rank16 and dense rank4."
+  },
+  "hypotheses": {
+    "signed_beats_hard": {
+      "supported": false,
+      "reason": "At scale 0.1, signed trails hard by 0.60 average-accuracy points in the one-seed smoke."
+    },
+    "basis_beats_care": {
+      "supported": false,
+      "reason": "All basis variants observed so far trail CaRE in the smoke protocol."
+    },
+    "sparse_beats_equal_flops_dense": {
+      "supported": false,
+      "reason": "Signed/Hard average accuracy is only 0.375 points above dense in a one-seed, one-epoch smoke and is not formal evidence."
+    }
+  },
+  "summary": "Scale 0.1 Hard Top-2 reaches 90.055 average accuracy versus CaRE 91.55, no-adapter 86.175, and fixed Top-2 88.7. The content-addressed reader therefore has a +1.355-point exploratory effect over a matched fixed-routing basis control. Signed is slightly worse but forgets less. Uniform load balancing removes dead slots yet harms accuracy. Results remain one-seed, one-epoch smoke only."
+}
