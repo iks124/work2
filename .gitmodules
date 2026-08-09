@@ -3,7 +3,7 @@
 	url = https://github.com/OSU-NLP-Group/Mind2Web.git
 [submodule "PolySkill"]
 	path = PolySkill
-	url = https://github.com/simonucl/PolySkill.git
+	url = https://github.com/iks124/PolySkill.git
 [submodule "XSkill"]
 	path = XSkill
 	url = https://github.com/XSkill-Agent/XSkill.git
